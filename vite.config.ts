@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
+import { VitePWA } from "vite-plugin-pwa";
 
 // =============================================================================
 // Manus Debug Collector - Vite Plugin
@@ -34,7 +35,6 @@ function trimLogFile(logPath: string, maxSize: number) {
     const keptLines: string[] = [];
     let keptBytes = 0;
 
-    // Keep newest lines (from end) that fit within 60% of maxSize
     const targetSize = TRIM_TARGET_BYTES;
     for (let i = lines.length - 1; i >= 0; i--) {
       const lineBytes = Buffer.byteLength(`${lines[i]}\n`, "utf-8");
@@ -55,25 +55,15 @@ function writeToLogFile(source: LogSource, entries: unknown[]) {
   ensureLogDir();
   const logPath = path.join(LOG_DIR, `${source}.log`);
 
-  // Format entries with timestamps
   const lines = entries.map((entry) => {
     const ts = new Date().toISOString();
     return `[${ts}] ${JSON.stringify(entry)}`;
   });
 
-  // Append to log file
   fs.appendFileSync(logPath, `${lines.join("\n")}\n`, "utf-8");
-
-  // Trim if exceeds max size
   trimLogFile(logPath, MAX_LOG_SIZE_BYTES);
 }
 
-/**
- * Vite plugin to collect browser debug logs
- * - POST /__manus__/logs: Browser sends logs, written directly to files
- * - Files: browserConsole.log, networkRequests.log, sessionReplay.log
- * - Auto-trimmed when exceeding 1MB (keeps newest entries)
- */
 function vitePluginManusDebugCollector(): Plugin {
   return {
     name: "manus-debug-collector",
@@ -98,14 +88,12 @@ function vitePluginManusDebugCollector(): Plugin {
     },
 
     configureServer(server: ViteDevServer) {
-      // POST /__manus__/logs: Browser sends logs (written directly to files)
       server.middlewares.use("/__manus__/logs", (req, res, next) => {
         if (req.method !== "POST") {
           return next();
         }
 
         const handlePayload = (payload: any) => {
-          // Write logs directly to files
           if (payload.consoleLogs?.length > 0) {
             writeToLogFile("browserConsole", payload.consoleLogs);
           }
@@ -150,7 +138,77 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+const plugins = [
+  react(), 
+  tailwindcss(), 
+  jsxLocPlugin(), 
+  vitePluginManusRuntime(), 
+  vitePluginManusDebugCollector(),
+  VitePWA({
+    registerType: 'autoUpdate',
+    includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+    manifest: {
+      name: 'Meu Caderno',
+      short_name: 'Caderno',
+      description: 'Suas tarefas e notas organizadas com design de caderno de papel.',
+      theme_color: '#C0533A',
+      background_color: '#FDFCF0',
+      display: 'standalone',
+      icons: [
+        {
+          src: 'pwa-192x192.png',
+          sizes: '192x192',
+          type: 'image/png'
+        },
+        {
+          src: 'pwa-512x512.png',
+          sizes: '512x512',
+          type: 'image/png'
+        },
+        {
+          src: 'pwa-512x512.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'any maskable'
+        }
+      ]
+    },
+    workbox: {
+      globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'google-fonts-cache',
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: 60 * 60 * 24 * 365
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        },
+        {
+          urlPattern: /\/api\/.*/,
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'api-cache',
+            networkTimeoutSeconds: 10,
+            expiration: {
+              maxEntries: 50,
+              maxAgeSeconds: 60 * 60 * 24
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        }
+      ]
+    }
+  })
+];
 
 export default defineConfig({
   plugins,
@@ -169,8 +227,14 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    strictPort: false, // Will find next available port if 3000 is busy
+    strictPort: false,
     host: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+    },
     allowedHosts: [
       ".manuspre.computer",
       ".manus.computer",

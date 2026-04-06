@@ -19,10 +19,13 @@ import {
   X,
   BarChart3,
   Trophy,
+  LogOut,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { NotificationBadge } from './NotificationBadge';
+import { useAuth } from '@/hooks/useAuth';
 
 interface NavItem {
   icon: React.ReactNode;
@@ -84,6 +87,7 @@ function SidebarContent({
   onNavClick,
   notificationCounts = { critical: 0, high: 0, medium: 0 },
 }: SidebarContentProps) {
+  const { user, logout } = useAuth();
   const NAV_ITEMS: NavItem[] = [
     { icon: <LayoutDashboard size={18} />, label: 'Visão Geral', href: '/', showBadge: true },
     { icon: <CheckSquare size={18} />, label: 'Tarefas', href: '/tasks', showBadge: true },
@@ -143,14 +147,35 @@ function SidebarContent({
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="px-3 py-4 border-t border-sidebar-border">
-        <p className={cn(
-          'font-accent text-sidebar-foreground/40 text-xs text-center',
-          collapsed && 'hidden'
-        )}>
-          Suas ideias, organizadas.
-        </p>
+      {/* User Section & Logout */}
+      <div className="px-2 py-4 border-t border-sidebar-border space-y-1">
+        {!collapsed && user && (
+          <div className="px-3 py-2 flex items-center gap-3 mb-1">
+            <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center">
+              <User size={14} className="text-sidebar-foreground/70" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-body text-xs font-medium text-sidebar-foreground truncate">
+                {user.username}
+              </p>
+              <p className="font-accent text-[10px] text-sidebar-foreground/40">
+                Logado
+              </p>
+            </div>
+          </div>
+        )}
+        <button
+          onClick={() => logout()}
+          className={cn(
+            'w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-150',
+            'text-sidebar-foreground/60 hover:text-destructive hover:bg-destructive/10',
+            collapsed && 'justify-center px-2'
+          )}
+          title="Sair do sistema"
+        >
+          <LogOut size={18} />
+          {!collapsed && <span className="font-body text-sm font-medium">Sair</span>}
+        </button>
       </div>
     </div>
   );
