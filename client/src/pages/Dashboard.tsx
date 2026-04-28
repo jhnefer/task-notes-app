@@ -182,10 +182,10 @@ export default function Dashboard() {
         {/* Stats grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <StatCard
-            icon={<CheckSquare size={20} style={{ color: '#C0533A' }} />}
+            icon={<CheckSquare size={20} style={{ color: '#50816a' }} />}
             label="Concluídas"
             value={stats.done}
-            accentColor="#C0533A"
+            accentColor="#50816a"
             sub={`de ${stats.total} tarefas`}
             delay={0}
           />
@@ -206,10 +206,10 @@ export default function Dashboard() {
             delay={100}
           />
           <StatCard
-            icon={<FileText size={20} style={{ color: '#4A7C59' }} />}
+            icon={<FileText size={20} style={{ color: '#57498b' }} />}
             label="Anotações"
             value={stats.notes}
-            accentColor="#4A7C59"
+            accentColor="#57498b"
             sub="registros salvos"
             delay={150}
           />
