@@ -1,13 +1,11 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { db } from "./db.ts";
-import { 
-  tasks, notes, categories, 
-  insertTaskSchema, insertNoteSchema, insertCategorySchema 
-} from "../shared/schema.ts";
+import { tasks, notes, categories, insertTaskSchema, insertNoteSchema, insertCategorySchema } from "../shared/schema.ts";
 import { eq, desc, and } from "drizzle-orm";
 import { isAuthenticated } from "./auth.ts";
 import { nanoid } from "nanoid";
+import { GoogleGenAI } from "@google/genai";
 
 export function registerRoutes(app: Express): Server {
   // --- API: Categorias ---
@@ -138,6 +136,85 @@ export function registerRoutes(app: Express): Server {
     res.status(204).end();
   });
 
+  // --- API: IA Breakdown ---
+  app.post("/api/ai/breakdown", async (req, res) => {
+    try {
+      const { goal } = req.body;
+
+      if (!goal || typeof goal !== "string") {
+        return res.status(400).json({ error: "O campo 'goal' é obrigatório." });
+      }
+
+      const apiKey = process.env.GEMINI_API_KEY;
+
+      if (!apiKey) {
+        console.error("ERRO: GEMINI_API_KEY não foi encontrada no .env");
+        return res.status(500).json({ error: "Chave da API não configurada." });
+      }
+
+      // Passamos a versão da API v1beta explicitamente nas opções da SDK
+      const ai = new GoogleGenAI({ 
+        apiKey: apiKey.trim(),
+        apiVersion: "v1beta"
+      } as any);
+
+      const prompt = `Você é um assistente de produtividade.
+Analise este objetivo: "${goal}".
+Decomponha este objetivo em exatamente 3 subtarefas práticas e objetivas.
+
+Retorne EXCLUSIVAMENTE um objeto JSON no seguinte formato:
+{
+  "subtasks": [
+    { "title": "Descrição da subtarefa 1", "priority": "high" },
+    { "title": "Descrição da subtarefa 2", "priority": "medium" },
+    { "title": "Descrição da subtarefa 3", "priority": "low" }
+  ]
+}`;
+
+      // Testando os modelos válidos no endpoint v1beta
+      const modelsToTry = [
+        "gemini-3.8-flash",
+        "gemini-2.5-flash",
+        "gemini-3.5-flash"
+      ];
+
+      let responseText: string | null = null;
+
+      for (const modelName of modelsToTry) {
+        try {
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: prompt,
+            config: {
+              temperature: 0.2,
+              responseMimeType: "application/json",
+            },
+          });
+
+          if (response?.text) {
+            responseText = response.text;
+            console.log(`✓ Sucesso gerando conteúdo com o modelo: ${modelName}`);
+            break;
+          }
+        } catch (err: any) {
+          console.warn(`Tentativa com ${modelName} falhou:`, err?.message || err);
+        }
+      }
+
+      if (!responseText) {
+        return res.status(503).json({ error: "Serviço de IA temporariamente indisponível. Tente novamente em instantes." });
+      }
+
+      const parsedData = JSON.parse(responseText);
+      return res.json(parsedData);
+
+    } catch (error) {
+      console.error("Erro geral na rota de IA:", error);
+      return res.status(500).json({ 
+        error: "Não foi possível gerar as subtarefas no momento." 
+      });
+    }
+  });
   const httpServer = createServer(app);
   return httpServer;
 }
