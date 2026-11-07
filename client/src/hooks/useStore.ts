@@ -7,15 +7,38 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { 
   Task, Note, Category, NewTask, NewNote, NewCategory,
-  Priority, TaskStatus, RecurrenceRule, RecurrenceFrequency,
+  Priority, TaskStatus, RecurrenceRule, RecurrenceFrequency, Subtask,
   PRIORITY_OPTIONS, STATUS_OPTIONS, RECURRENCE_FREQUENCIES
 } from '@shared/schema';
 
 // Re-exportando tipos e constantes para manter compatibilidade e facilitar uso
-export type { Task, Note, Category, NewTask, NewNote, NewCategory, Priority, TaskStatus, RecurrenceRule, RecurrenceFrequency };
+export type { Task, Note, Category, NewTask, NewNote, NewCategory, Priority, TaskStatus, RecurrenceRule, RecurrenceFrequency, Subtask };
 export { PRIORITY_OPTIONS, STATUS_OPTIONS, RECURRENCE_FREQUENCIES };
 
 const api = axios.create({ baseURL: '/api' });
+
+// Helper para parsing de JSON seguro no cliente
+function safeParse<T = any>(val: any): T[] {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'string') {
+    try {
+      const p = JSON.parse(val);
+      if (typeof p === 'string') {
+        try {
+          const second = JSON.parse(p);
+          return Array.isArray(second) ? second : [];
+        } catch {
+          return [];
+        }
+      }
+      return Array.isArray(p) ? p : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
 
 // Função auxiliar para limpar dados do SQLite (null -> undefined, string tags -> array)
 const cleanTask = (t: any): Task => ({
@@ -23,16 +46,17 @@ const cleanTask = (t: any): Task => ({
   description: t.description || '',
   categoryId: t.categoryId || undefined,
   dueDate: t.dueDate || undefined,
-  tags: typeof t.tags === 'string' ? JSON.parse(t.tags) : (t.tags || []),
-  recurrence: t.recurrence ? JSON.parse(t.recurrence) : undefined,
+  tags: safeParse(t.tags),
+  recurrence: t.recurrence ? (typeof t.recurrence === 'string' ? JSON.parse(t.recurrence) : t.recurrence) : undefined,
   parentTaskId: t.parentTaskId || undefined,
   occurrenceDate: t.occurrenceDate || undefined,
+  subtasks: safeParse<Subtask>(t.subtasks),
 });
 
 const cleanNote = (n: any): Note => ({
   ...n,
   categoryId: n.categoryId || undefined,
-  tags: typeof n.tags === 'string' ? JSON.parse(n.tags) : (n.tags || []),
+  tags: safeParse(n.tags),
 });
 
 export function useStore() {
@@ -70,10 +94,7 @@ export function useStore() {
 
   const updateTaskMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Task> }) => {
-      const payload = { ...updates };
-      if (payload.tags) (payload as any).tags = JSON.stringify(payload.tags);
-      if (payload.recurrence) (payload as any).recurrence = JSON.stringify(payload.recurrence);
-      return (await api.patch(`/tasks/${id}`, payload)).data;
+      return (await api.patch(`/tasks/${id}`, updates)).data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
   });
@@ -157,6 +178,27 @@ export function useStore() {
     updateTask: (id: string, updates: any) => updateTaskMutation.mutate({ id, updates }),
     deleteTask: (id: string) => deleteTaskMutation.mutate(id),
     toggleTaskStatus: (id: string) => toggleTaskStatusMutation.mutate(id),
+    toggleSubtask: (taskId: string, subtaskId: string) => {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task || !task.subtasks) return;
+      const updatedSubtasks = task.subtasks.map(s =>
+        s.id === subtaskId ? { ...s, completed: !s.completed } : s
+      );
+      const allDone = updatedSubtasks.length > 0 && updatedSubtasks.every(s => s.completed);
+      let nextStatus = task.status;
+      if (allDone && task.status !== 'done') {
+        nextStatus = 'done';
+      } else if (!allDone && task.status === 'done') {
+        nextStatus = 'in_progress';
+      }
+      updateTaskMutation.mutate({
+        id: taskId,
+        updates: {
+          subtasks: updatedSubtasks,
+          status: nextStatus,
+        },
+      });
+    },
     addNote: (note: any) => addNoteMutation.mutate(note),
     updateNote: (id: string, updates: any) => updateNoteMutation.mutate({ id, updates }),
     deleteNote: (id: string) => deleteNoteMutation.mutate(id),

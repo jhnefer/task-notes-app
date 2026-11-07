@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { Task, TaskStatus } from '@/hooks/useStore';
 import { cn } from '@/lib/utils';
-import { Trash2, Edit3, Check, Clock, AlertTriangle } from 'lucide-react';
+import { Trash2, Edit3, Check, Clock, AlertTriangle, Target } from 'lucide-react';
 import { RecurrenceBadge } from './RecurrenceBadge';
 
 interface KanbanBoardProps {
@@ -98,6 +98,29 @@ function KanbanCard({
         <p className="font-body text-xs text-muted-foreground line-clamp-2 mb-2">
           {task.description}
         </p>
+      )}
+
+      {task.subtasks && task.subtasks.length > 0 && (
+        <div className="mb-2 p-1.5 rounded bg-muted/40 border border-border/60">
+          <div className="flex items-center justify-between text-[11px] mb-1">
+            <span className="flex items-center gap-1 font-medium text-foreground">
+              <Target size={11} className="text-primary" />
+              Submetas: {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length}
+            </span>
+            <span className="font-mono text-muted-foreground text-[10px]">
+              {Math.round((task.subtasks.filter(s => s.completed).length / task.subtasks.length) * 100)}%
+            </span>
+          </div>
+          <div className="w-full bg-muted rounded-full h-1 overflow-hidden">
+            <div 
+              className={cn(
+                'h-1 rounded-full transition-all duration-300',
+                task.subtasks.every(s => s.completed) ? 'bg-emerald-500' : 'bg-primary'
+              )} 
+              style={{ width: `${Math.round((task.subtasks.filter(s => s.completed).length / task.subtasks.length) * 100)}%` }} 
+            />
+          </div>
+        </div>
       )}
 
       <div className="flex items-center flex-wrap gap-1.5">

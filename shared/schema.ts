@@ -12,6 +12,13 @@ export type Priority = (typeof PRIORITY_OPTIONS)[number];
 export type TaskStatus = (typeof STATUS_OPTIONS)[number];
 export type RecurrenceFrequency = (typeof RECURRENCE_FREQUENCIES)[number];
 
+export interface Subtask {
+  id: string;
+  title: string;
+  completed: boolean;
+  priority: Priority;
+}
+
 export interface RecurrenceRule {
   frequency: RecurrenceFrequency;
   interval: number;
@@ -50,6 +57,7 @@ export const tasks = sqliteTable("tasks", {
   recurrence: text("recurrence"),
   parentTaskId: text("parent_task_id"),
   occurrenceDate: text("occurrence_date"),
+  subtasks: text("subtasks").default("[]"),
 });
 
 export const notes = sqliteTable("notes", {
@@ -71,6 +79,12 @@ export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 export const insertTaskSchema = createInsertSchema(tasks, {
   dueDate: z.string().datetime().optional(),
   tags: z.array(z.string()).optional(),
+  subtasks: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    completed: z.boolean(),
+    priority: z.enum(PRIORITY_OPTIONS),
+  })).optional(),
 }).omit({
   id: true,
   userId: true,
@@ -98,7 +112,7 @@ export type User = Omit<typeof users.$inferSelect, 'password'>;
 export type Category = typeof categories.$inferSelect;
 
 type DrizzleTask = typeof tasks.$inferSelect;
-export interface Task extends Omit<DrizzleTask, 'tags' | 'description' | 'categoryId' | 'dueDate' | 'recurrence' | 'parentTaskId' | 'occurrenceDate' | 'priority' | 'status'> {
+export interface Task extends Omit<DrizzleTask, 'tags' | 'description' | 'categoryId' | 'dueDate' | 'recurrence' | 'parentTaskId' | 'occurrenceDate' | 'priority' | 'status' | 'subtasks'> {
   tags: string[];
   description?: string;
   categoryId?: string;
@@ -108,6 +122,7 @@ export interface Task extends Omit<DrizzleTask, 'tags' | 'description' | 'catego
   recurrence?: RecurrenceRule;
   parentTaskId?: string;
   occurrenceDate?: string;
+  subtasks?: Subtask[];
 }
 
 export interface Note extends Omit<typeof notes.$inferSelect, 'tags' | 'categoryId'> {

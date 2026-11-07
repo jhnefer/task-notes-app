@@ -1,6 +1,6 @@
 /**
- * Tasks — Full task management page
- * Design: Warm Paper Notebook — ruled lines, ink typography, terracotta accents
+- Tasks — Full task management page
+- Design: Warm Paper Notebook — ruled lines, ink typography, terracotta accents
  */
 
 import { useState, useMemo } from 'react';
@@ -20,9 +20,11 @@ import {
   LayoutList,
   Columns3,
   Repeat2,
+  Target,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
-import { Task, Priority, TaskStatus } from '@/hooks/useStore';
+import { Task, Priority, TaskStatus, Subtask } from '@/hooks/useStore';
+import { nanoid } from 'nanoid';
 import { cn } from '@/lib/utils';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -48,7 +50,7 @@ import { toast } from 'sonner';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { ExportMenu } from '@/components/ExportMenu';
 import { RecurringTaskDialog } from '@/components/RecurringTaskDialog';
-import { isTaskOccurrence } from '@/lib/recurrence';
+import { AiBreakdownModal } from '@/components/AiBreakdownModal';
 
 const PRIORITY_LABELS: Record<Priority, string> = {
   high: 'Alta',
@@ -90,6 +92,7 @@ interface TaskFormData {
   categoryId: string;
   dueDate: string;
   tags: string;
+  subtasks: Subtask[];
 }
 
 const EMPTY_FORM: TaskFormData = {
@@ -100,6 +103,7 @@ const EMPTY_FORM: TaskFormData = {
   categoryId: '',
   dueDate: '',
   tags: '',
+  subtasks: [],
 };
 
 function TaskDialog({
@@ -112,6 +116,7 @@ function TaskDialog({
   task?: Task;
 }) {
   const { addTask, updateTask, categories } = useApp();
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [form, setForm] = useState<TaskFormData>(
     task
       ? {
@@ -122,15 +127,44 @@ function TaskDialog({
           categoryId: task.categoryId ?? '',
           dueDate: task.dueDate ? task.dueDate.substring(0, 10) : '',
           tags: task.tags.join(', '),
+          subtasks: task.subtasks ? [...task.subtasks] : [],
         }
       : EMPTY_FORM
   );
+
+  const handleAddManualSubtask = () => {
+    if (!newSubtaskTitle.trim()) return;
+    const newSub: Subtask = {
+      id: nanoid(),
+      title: newSubtaskTitle.trim(),
+      completed: false,
+      priority: form.priority,
+    };
+    setForm(f => ({
+      ...f,
+      subtasks: [...f.subtasks, newSub],
+    }));
+    setNewSubtaskTitle('');
+  };
 
   const handleSave = () => {
     if (!form.title.trim()) {
       toast.error('O título é obrigatório.');
       return;
     }
+
+    // Regra: Bloquear conclusão da meta se houver submetas pendentes
+    if (form.status === 'done' && form.subtasks.length > 0) {
+      const pendingCount = form.subtasks.filter(s => !s.completed).length;
+      if (pendingCount > 0) {
+        toast.warning(
+          `Esta meta possui ${pendingCount} submeta${pendingCount > 1 ? 's' : ''} pendente${pendingCount > 1 ? 's' : ''}. Complete todas antes de finalizá-la!`,
+          { icon: '⚠️' }
+        );
+        return;
+      }
+    }
+
     const payload = {
       title: form.title.trim(),
       description: form.description.trim() || undefined,
@@ -142,6 +176,7 @@ function TaskDialog({
         .split(',')
         .map(t => t.trim())
         .filter(Boolean),
+      subtasks: form.subtasks,
     };
     if (task) {
       updateTask(task.id, payload);
@@ -155,7 +190,7 @@ function TaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="max-w-lg bg-card border-border">
+      <DialogContent className="max-w-lg bg-card border-border max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display text-xl text-foreground">
             {task ? 'Editar Tarefa' : 'Nova Tarefa'}
@@ -171,13 +206,127 @@ function TaskDialog({
               className="font-body bg-background border-border"
             />
           </div>
+
+          {/* MÓDULO DA IA: Decomposição de tarefas pelo Gemini em Submetas */}
+          <AiBreakdownModal
+            taskTitle={form.title}
+            onAddSubtasks={(subtasks) => {
+              const formatted: Subtask[] = subtasks.map(st => ({
+                id: nanoid(),
+                title: st.title,
+                completed: false,
+                priority: st.priority,
+              }));
+              setForm(f => ({
+                ...f,
+                subtasks: [...f.subtasks, ...formatted],
+              }));
+              toast.success(`${formatted.length} submetas adicionadas à meta!`);
+            }}
+          />
+
+          {/* LISTA INTERATIVA DE SUBMETAS */}
+          <div className="space-y-2 pt-2 border-t border-border">
+            <div className="flex items-center justify-between">
+              <Label className="font-body text-sm font-semibold text-foreground flex items-center gap-1.5">
+                <Target size={15} className="text-primary" />
+                Submetas ({form.subtasks.filter(s => s.completed).length}/{form.subtasks.length})
+              </Label>
+              {form.subtasks.length > 0 && (
+                <span className="text-xs text-muted-foreground font-mono">
+                  {Math.round((form.subtasks.filter(s => s.completed).length / form.subtasks.length) * 100)}% concluídas
+                </span>
+              )}
+            </div>
+
+            {form.subtasks.length > 0 ? (
+              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                {form.subtasks.map((st, idx) => (
+                  <div
+                    key={st.id || idx}
+                    className="flex items-center justify-between p-2 rounded-lg border border-border bg-muted/40 text-xs"
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
+                      <input
+                        type="checkbox"
+                        checked={st.completed}
+                        onChange={(e) => {
+                          const updated = form.subtasks.map((item, i) =>
+                            i === idx ? { ...item, completed: e.target.checked } : item
+                          );
+                          setForm(f => ({ ...f, subtasks: updated }));
+                        }}
+                        className="rounded border-border text-primary focus:ring-primary w-3.5 h-3.5 cursor-pointer"
+                      />
+                      <span className={cn('truncate', st.completed && 'line-through text-muted-foreground')}>
+                        {st.title}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className={cn(
+                        'px-1.5 py-0.5 rounded text-[10px] font-medium uppercase',
+                        st.priority === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300' :
+                        st.priority === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300' :
+                        'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+                      )}>
+                        {st.priority}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setForm(f => ({
+                            ...f,
+                            subtasks: f.subtasks.filter((_, i) => i !== idx),
+                          }));
+                        }}
+                        className="p-1 hover:text-destructive text-muted-foreground transition-colors"
+                        title="Remover submeta"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground italic">Nenhuma submeta adicionada ainda.</p>
+            )}
+
+            {/* Adicionar submeta manual */}
+            <div className="flex items-center gap-2 pt-1">
+              <Input
+                placeholder="Adicionar submeta manual..."
+                value={newSubtaskTitle}
+                onChange={e => setNewSubtaskTitle(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddManualSubtask();
+                  }
+                }}
+                className="h-8 text-xs bg-background border-border flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddManualSubtask}
+                disabled={!newSubtaskTitle.trim()}
+                className="h-8 px-2.5 text-xs gap-1 border-border"
+              >
+                <Plus size={13} />
+                Adicionar
+              </Button>
+            </div>
+          </div>
+
           <div>
             <Label className="font-body text-sm text-foreground mb-1.5 block">Descrição</Label>
             <Textarea
               value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               placeholder="Detalhes adicionais..."
-              rows={3}
+              rows={4}
               className="font-body bg-background border-border resize-none"
             />
           </div>
@@ -269,7 +418,7 @@ function TaskDialog({
 }
 
 export default function Tasks() {
-  const { tasks, categories, toggleTaskStatus, deleteTask, updateTask, addRecurringTask } = useApp();
+  const { tasks, categories, toggleTaskStatus, toggleSubtask, deleteTask, updateTask, addRecurringTask } = useApp();
   const [search, setSearch] = useState('');
   const [filterPriority, setFilterPriority] = useState<Priority | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all'>('all');
@@ -279,6 +428,11 @@ export default function Tasks() {
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [recurringDialogOpen, setRecurringDialogOpen] = useState(false);
+  const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
+
+  const toggleExpandTask = (id: string) => {
+    setExpandedTasks(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const filtered = useMemo(() => {
     return tasks.filter(t => {
@@ -326,10 +480,35 @@ export default function Tasks() {
 
   const handleStatusChange = (taskId: string, newStatus: TaskStatus) => {
     const task = tasks.find(t => t.id === taskId);
-    if (task) {
-      updateTask(taskId, { status: newStatus });
-      toast.success('Tarefa movida!');
+    if (!task) return;
+
+    if (newStatus === 'done' && task.subtasks && task.subtasks.length > 0) {
+      const pendingCount = task.subtasks.filter(s => !s.completed).length;
+      if (pendingCount > 0) {
+        toast.warning(
+          `Esta meta possui ${pendingCount} submeta${pendingCount > 1 ? 's' : ''} pendente${pendingCount > 1 ? 's' : ''}. Complete todas antes de finalizá-la!`,
+          { icon: '⚠️' }
+        );
+        return;
+      }
     }
+
+    updateTask(taskId, { status: newStatus });
+    toast.success('Tarefa movida!');
+  };
+
+  const handleToggleTask = (task: Task) => {
+    if (task.status !== 'done' && task.subtasks && task.subtasks.length > 0) {
+      const pendingCount = task.subtasks.filter(s => !s.completed).length;
+      if (pendingCount > 0) {
+        toast.warning(
+          `Esta meta possui ${pendingCount} submeta${pendingCount > 1 ? 's' : ''} pendente${pendingCount > 1 ? 's' : ''}. Complete todas antes de finalizá-la!`,
+          { icon: '⚠️' }
+        );
+        return;
+      }
+    }
+    toggleTaskStatus(task.id);
   };
 
   const activeFilters =
@@ -523,7 +702,7 @@ export default function Tasks() {
                     >
                       {/* Checkbox */}
                       <button
-                        onClick={() => toggleTaskStatus(task.id)}
+                        onClick={() => handleToggleTask(task)}
                         className={cn(
                           'mt-0.5 shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all',
                           task.status === 'done'
@@ -561,10 +740,86 @@ export default function Tasks() {
                         </div>
 
                         {task.description && (
-                          <p className="font-body text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                          <p className="font-body text-xs text-muted-foreground mt-0.5 line-clamp-2 whitespace-pre-line">
                             {task.description}
                           </p>
                         )}
+
+                        {/* Módulo de Submetas da Meta Maior */}
+                        {task.subtasks && task.subtasks.length > 0 && (() => {
+                          const completedCount = task.subtasks.filter(s => s.completed).length;
+                          const totalCount = task.subtasks.length;
+                          const pct = Math.round((completedCount / totalCount) * 100);
+                          const isExpanded = !!expandedTasks[task.id];
+
+                          return (
+                            <div className="mt-3 pt-2.5 border-t border-border/60">
+                              <div 
+                                onClick={() => toggleExpandTask(task.id)}
+                                className="flex items-center justify-between cursor-pointer py-1 group/sub"
+                              >
+                                <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+                                  <Target size={13} className="text-primary" />
+                                  <span>Submetas ({completedCount}/{totalCount})</span>
+                                  <span className="text-[11px] text-muted-foreground font-mono">({pct}%)</span>
+                                </div>
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground group-hover/sub:text-foreground transition-colors">
+                                  <span className="text-[11px]">{isExpanded ? 'Ocultar' : 'Ver submetas'}</span>
+                                  <ChevronDown size={13} className={cn('transition-transform duration-200', isExpanded && 'rotate-180')} />
+                                </div>
+                              </div>
+
+                              {/* Barra de progresso */}
+                              <div className="w-full bg-muted rounded-full h-1.5 mt-1 overflow-hidden">
+                                <div 
+                                  className={cn(
+                                    'h-1.5 transition-all duration-300 rounded-full',
+                                    pct === 100 ? 'bg-emerald-500' : 'bg-primary'
+                                  )} 
+                                  style={{ width: `${pct}%` }} 
+                                />
+                              </div>
+
+                              {/* Lista interativa de submetas */}
+                              {isExpanded && (
+                                <div className="mt-2.5 space-y-1.5 pl-1">
+                                  {task.subtasks.map(st => (
+                                    <div 
+                                      key={st.id}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleSubtask(task.id, st.id);
+                                      }}
+                                      className="flex items-center justify-between p-1.5 rounded hover:bg-muted/60 cursor-pointer text-xs transition-colors"
+                                    >
+                                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                                        <div className={cn(
+                                          'w-4 h-4 rounded border flex items-center justify-center transition-all shrink-0',
+                                          st.completed 
+                                            ? 'bg-emerald-500 border-emerald-500 text-white' 
+                                            : 'border-border hover:border-primary'
+                                        )}>
+                                          {st.completed && <Check size={10} />}
+                                        </div>
+                                        <span className={cn('truncate', st.completed && 'line-through text-muted-foreground')}>
+                                          {st.title}
+                                        </span>
+                                      </div>
+                                      <span className={cn(
+                                        'text-[9px] uppercase px-1 rounded font-medium shrink-0 ml-2',
+                                        st.priority === 'high' ? 'text-red-600 bg-red-50 dark:bg-red-950/50' :
+                                        st.priority === 'medium' ? 'text-amber-600 bg-amber-50 dark:bg-amber-950/50' :
+                                        'text-blue-600 bg-blue-50 dark:bg-blue-950/50'
+                                      )}>
+                                        {st.priority}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
 
                         <div className="flex items-center flex-wrap gap-2 mt-2">
                           <span className={cn(
