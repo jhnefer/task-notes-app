@@ -77,7 +77,7 @@ export const notes = sqliteTable("notes", {
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 
 export const insertTaskSchema = createInsertSchema(tasks, {
-  dueDate: z.string().datetime().optional(),
+  dueDate: z.string().datetime().optional().nullable(),
   tags: z.array(z.string()).optional(),
   subtasks: z.array(z.object({
     id: z.string(),

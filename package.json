@@ -11,6 +11,7 @@
     "start": "NODE_ENV=production node dist/index.js",
     "preview": "vite preview --host",
     "check": "tsc --noEmit",
+    "benchmark:ai": "tsx scripts/benchmark-ai.ts",
     "format": "prettier --write ."
   },
   "dependencies": {

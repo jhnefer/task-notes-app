@@ -5,26 +5,7 @@ import { tasks, notes, categories, insertTaskSchema, insertNoteSchema, insertCat
 import { eq, desc, and } from "drizzle-orm";
 import { isAuthenticated } from "./auth.ts";
 import { nanoid } from "nanoid";
-import { GoogleGenAI } from "@google/genai";
-
-// Cache do cliente GoogleGenAI para reutilizar conexões HTTP (Keep-Alive)
-let cachedAIClient: { key: string; client: GoogleGenAI } | null = null;
-function getAIClient(apiKey: string): GoogleGenAI {
-  const trimmed = apiKey.trim();
-  if (!cachedAIClient || cachedAIClient.key !== trimmed) {
-    cachedAIClient = { key: trimmed, client: new GoogleGenAI({ apiKey: trimmed } as any) };
-  }
-  return cachedAIClient.client;
-}
-
-// Modelos otimizados para estabilidade e velocidade:
-// gemini-3.5-flash como principal para máxima estabilidade de tráfego (~1.7s constante)
-// gemini-3.5-flash-lite e gemini-3.6-flash como contingência
-const FAST_AI_MODELS = [
-  "gemini-3.5-flash",
-  "gemini-3.5-flash-lite",
-  "gemini-3.6-flash",
-];
+import { extractTaskWithGemini } from "./aiService.ts";
 
 // Helper seguro para parsing de JSON arrays (evita double-encoding ou erro se vier string)
 function safeParseArray<T = any>(val: any): T[] {
@@ -92,8 +73,25 @@ export function registerRoutes(app: Express): Server {
 
   app.post("/api/tasks", isAuthenticated, async (req, res) => {
     const user = req.user as any;
-    const result = insertTaskSchema.safeParse(req.body);
+
+    // Normalização defensiva do payload para evitar erros 400 em variações de status ou data
+    const body = { ...req.body };
+    if (body.status === 'todo') {
+      body.status = 'pending';
+    }
+    if (body.dueDate && typeof body.dueDate === 'string' && !body.dueDate.includes('T')) {
+      const parsed = new Date(body.dueDate + 'T12:00:00Z');
+      if (!isNaN(parsed.getTime())) {
+        body.dueDate = parsed.toISOString();
+      }
+    }
+    if (body.dueDate === '' || body.dueDate === null) {
+      body.dueDate = undefined;
+    }
+
+    const result = insertTaskSchema.safeParse(body);
     if (!result.success) {
+      console.error("Erro de validação em POST /api/tasks:", result.error.flatten());
       return res.status(400).json({ errors: result.error.flatten().fieldErrors });
     }
     const now = new Date().toISOString();
@@ -207,73 +205,72 @@ export function registerRoutes(app: Express): Server {
     res.status(204).end();
   });
 
- // --- API: IA Breakdown ---
+  // --- API: IA Task Extraction & Breakdown ---
+  app.post("/api/ai/extract-task", async (req, res) => {
+    try {
+      const { text, referenceDate, timeZone } = req.body;
+
+      if (!text || typeof text !== "string" || !text.trim()) {
+        return res.status(400).json({ error: "O campo 'text' é obrigatório." });
+      }
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        console.error("ERRO: GEMINI_API_KEY não foi encontrada no .env");
+        return res.status(500).json({ error: "Chave da API Gemini não configurada." });
+      }
+
+      const extracted = await extractTaskWithGemini(apiKey, {
+        text: text.trim(),
+        referenceDate: referenceDate || new Date().toISOString(),
+        timeZone: timeZone || "America/Fortaleza",
+      });
+
+      return res.json(extracted);
+    } catch (error: any) {
+      console.error("Erro na rota /api/ai/extract-task:", error?.message || error);
+      return res.status(500).json({
+        error: error?.message || "Não foi possível extrair a tarefa com IA no momento.",
+      });
+    }
+  });
+
+  // Mantém retrocompatibilidade com o modal de subtarefas existente
   app.post("/api/ai/breakdown", async (req, res) => {
     try {
-      const { goal } = req.body;
+      const { goal, referenceDate, timeZone } = req.body;
 
       if (!goal || typeof goal !== "string") {
         return res.status(400).json({ error: "O campo 'goal' é obrigatório." });
       }
 
       const apiKey = process.env.GEMINI_API_KEY;
-
       if (!apiKey) {
         console.error("ERRO: GEMINI_API_KEY não foi encontrada no .env");
         return res.status(500).json({ error: "Chave da API não configurada." });
       }
 
-      const ai = getAIClient(apiKey);
+      const extracted = await extractTaskWithGemini(apiKey, {
+        text: goal,
+        referenceDate: referenceDate || new Date().toISOString(),
+        timeZone: timeZone || "America/Fortaleza",
+      });
 
-      const prompt = `Você é um assistente de produtividade.
-Analise este objetivo: "${goal}".
-Decomponha este objetivo em exatamente 3 subtarefas práticas e objetivas.
-
-Retorne EXCLUSIVAMENTE um objeto JSON no seguinte formato:
-{
-  "subtasks": [
-    { "title": "Descrição da subtarefa 1", "priority": "high" },
-    { "title": "Descrição da subtarefa 2", "priority": "medium" },
-    { "title": "Descrição da subtarefa 3", "priority": "low" }
-  ]
-}`;
-
-      let responseText: string | null = null;
-      let lastError: any = null;
-
-      // Itera sobre os modelos rápidos com timeout individual de 5 segundos
-      for (const model of FAST_AI_MODELS) {
-        try {
-          const response = await ai.models.generateContent({
-            model,
-            contents: prompt,
-            config: {
-              temperature: 0.2,
-              responseMimeType: "application/json",
-              abortSignal: AbortSignal.timeout(5000),
-            },
-          });
-
-          if (response?.text) {
-            responseText = response.text;
-            console.log(`✓ IA Breakdown respondido com sucesso pelo modelo: ${model}`);
-            break;
-          }
-        } catch (err: any) {
-          lastError = err;
-          console.warn(`Tentativa com ${model} falhou ou expirou timeout:`, err?.message || err);
-        }
-      }
-
-      if (!responseText) {
-        throw lastError || new Error("Nenhum modelo retornou resposta válida.");
-      }
-
-      const parsedData = JSON.parse(responseText);
-      return res.json(parsedData);
-
-    } catch (error) {
-      console.error("Erro geral na rota de IA:", error);
+      // Retorna tanto o formato legado (subtasks com title e priority) quanto os novos campos extraídos
+      return res.json({
+        title: extracted.title,
+        dueDate: extracted.dueDate,
+        priority: extracted.priority,
+        description: extracted.description,
+        uncertainties: extracted.uncertainties,
+        subtasks: extracted.subtasks.map((s) => ({
+          title: s.title,
+          priority: s.priority || "medium",
+          dueDate: s.dueDate || null,
+        })),
+      });
+    } catch (error: any) {
+      console.error("Erro geral na rota /api/ai/breakdown:", error?.message || error);
       return res.status(500).json({ 
         error: "Não foi possível gerar as subtarefas no momento." 
       });

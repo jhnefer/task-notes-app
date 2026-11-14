@@ -223,6 +223,15 @@ function TaskDialog({
               }));
               toast.success(`${formatted.length} submetas adicionadas à meta!`);
             }}
+            onApplySuggestions={({ dueDate, priority, description }) => {
+              setForm(f => ({
+                ...f,
+                dueDate: dueDate || f.dueDate,
+                priority: (priority as any) || f.priority,
+                description: f.description || (description ?? f.description),
+              }));
+              toast.success('Sugestões de prazo e prioridade aplicadas!');
+            }}
           />
 
           {/* LISTA INTERATIVA DE SUBMETAS */}

@@ -7,16 +7,67 @@ import { db } from "./db.ts";
 import { users } from "../shared/schema.ts";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import fs from "fs";
+import path from "path";
+
+// Store de sessão persistente em arquivo local (evita perder o login quando o tsx reinicia o servidor)
+class FileSessionStore extends session.Store {
+  private filePath: string;
+  private sessions: Record<string, any> = {};
+
+  constructor(filePath = "./.sessions.json") {
+    super();
+    this.filePath = path.resolve(filePath);
+    try {
+      if (fs.existsSync(this.filePath)) {
+        this.sessions = JSON.parse(fs.readFileSync(this.filePath, "utf-8"));
+      }
+    } catch {
+      this.sessions = {};
+    }
+  }
+
+  private save() {
+    try {
+      fs.writeFileSync(this.filePath, JSON.stringify(this.sessions), "utf-8");
+    } catch {}
+  }
+
+  get(sid: string, callback: (err?: any, session?: any) => void) {
+    const sess = this.sessions[sid];
+    if (!sess) return callback(null, null);
+    if (sess.cookie?.expires && new Date(sess.cookie.expires) < new Date()) {
+      delete this.sessions[sid];
+      this.save();
+      return callback(null, null);
+    }
+    return callback(null, sess);
+  }
+
+  set(sid: string, sess: any, callback?: (err?: any) => void) {
+    this.sessions[sid] = sess;
+    this.save();
+    if (callback) callback(null);
+  }
+
+  destroy(sid: string, callback?: (err?: any) => void) {
+    delete this.sessions[sid];
+    this.save();
+    if (callback) callback(null);
+  }
+}
 
 export function setupAuth(app: Express) {
-  // Configuração básica de sessão (em memória para simplicidade inicial)
+  // Configuração de sessão persistente
   const sessionConfig: session.SessionOptions = {
-    secret: "caderno-secreto-key", // Em produção, use uma variável de ambiente
+    store: new FileSessionStore(),
+    secret: process.env.SESSION_SECRET || "caderno-secreto-key",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000, // 24 horas
+      secure: false, // Seguro para localhost e HTTP
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
     },
   };
 
@@ -93,5 +144,5 @@ export function setupAuth(app: Express) {
 // Middleware para proteger rotas
 export function isAuthenticated(req: Request, res: Response, next: NextFunction) {
   if (req.isAuthenticated()) return next();
-  res.status(401).send("Não autorizado");
+  res.status(401).json({ error: "Não autorizado" });
 }

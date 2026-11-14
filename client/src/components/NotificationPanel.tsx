@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Bell, X, Clock, AlertTriangle, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Bell, Clock, AlertTriangle, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -32,13 +32,13 @@ export function NotificationPanel() {
   const getUrgencyIcon = (urgency: string) => {
     switch (urgency) {
       case 'critical':
-        return <AlertTriangle size={16} className="text-destructive" />;
+        return <AlertTriangle size={16} className="text-destructive shrink-0" />;
       case 'high':
-        return <AlertCircle size={16} className="text-amber-500" />;
+        return <AlertCircle size={16} className="text-amber-500 shrink-0" />;
       case 'medium':
-        return <Clock size={16} className="text-primary" />;
+        return <Clock size={16} className="text-primary shrink-0" />;
       default:
-        return <Clock size={16} className="text-muted-foreground" />;
+        return <Clock size={16} className="text-muted-foreground shrink-0" />;
     }
   };
 
@@ -60,7 +60,7 @@ export function NotificationPanel() {
       case 'critical':
         return 'bg-destructive/10 text-destructive border-destructive/30';
       case 'high':
-        return 'bg-amber-50 text-amber-900 border-amber-200';
+        return 'bg-amber-50 text-amber-900 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60';
       case 'medium':
         return 'bg-primary/10 text-primary border-primary/30';
       default:
@@ -78,26 +78,26 @@ export function NotificationPanel() {
       >
         <Bell size={18} />
         {(count.critical > 0 || count.high > 0) && (
-          <span className="absolute top-0 right-0 w-2 h-2 bg-destructive rounded-full animate-pulse" />
+          <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full animate-pulse" />
         )}
       </button>
 
       {/* Panel dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl bg-card border-border">
-          <DialogHeader className="flex items-center justify-between">
-            <DialogTitle className="font-display text-xl text-foreground flex items-center gap-2">
+        <DialogContent className="max-w-xl sm:max-w-2xl bg-card border-border max-h-[90vh] overflow-y-auto w-[calc(100%-2rem)] p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle className="font-display text-lg sm:text-xl text-foreground flex items-center gap-2">
               <Bell size={20} className="text-primary" />
               Notificações
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4 py-2">
+          <div className="space-y-4 sm:space-y-5 py-2 w-full"> 
             {/* Enable browser notifications */}
             {typeof window !== 'undefined' && 'Notification' in window && (
               <div className="p-3 bg-muted/50 rounded-lg border border-border">
-                <div className="flex items-start justify-between">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  <div className="min-w-0">
                     <p className="font-body text-sm font-medium text-foreground">
                       Notificações do Navegador
                     </p>
@@ -108,7 +108,7 @@ export function NotificationPanel() {
                   <Button
                     size="sm"
                     onClick={handleEnableNotifications}
-                    className="font-body bg-primary text-primary-foreground hover:bg-primary/90"
+                    className="font-body bg-primary text-primary-foreground hover:bg-primary/90 shrink-0 self-start sm:self-auto text-xs h-8"
                   >
                     Ativar
                   </Button>
@@ -117,21 +117,21 @@ export function NotificationPanel() {
             )}
 
             {/* Notification stats */}
-            <div className="grid grid-cols-4 gap-2">
-              <div className="bg-destructive/10 rounded-lg p-2 text-center">
-                <p className="font-display text-lg font-bold text-destructive">{count.critical}</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-2.5 text-center">
+                <p className="font-display text-lg sm:text-xl font-bold text-destructive">{count.critical}</p>
                 <p className="font-body text-xs text-muted-foreground">Crítico</p>
               </div>
-              <div className="bg-amber-50 rounded-lg p-2 text-center">
-                <p className="font-display text-lg font-bold text-amber-700">{count.high}</p>
+              <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-lg p-2.5 text-center">
+                <p className="font-display text-lg sm:text-xl font-bold text-amber-700 dark:text-amber-400">{count.high}</p>
                 <p className="font-body text-xs text-muted-foreground">Urgente</p>
               </div>
-              <div className="bg-primary/10 rounded-lg p-2 text-center">
-                <p className="font-display text-lg font-bold text-primary">{count.medium}</p>
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-2.5 text-center">
+                <p className="font-display text-lg sm:text-xl font-bold text-primary">{count.medium}</p>
                 <p className="font-body text-xs text-muted-foreground">Próximo</p>
               </div>
-              <div className="bg-muted rounded-lg p-2 text-center">
-                <p className="font-display text-lg font-bold text-muted-foreground">{count.low}</p>
+              <div className="bg-muted border border-border rounded-lg p-2.5 text-center">
+                <p className="font-display text-lg sm:text-xl font-bold text-muted-foreground">{count.low}</p>
                 <p className="font-body text-xs text-muted-foreground">Baixo</p>
               </div>
             </div>
@@ -146,12 +146,12 @@ export function NotificationPanel() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
+              <div className="space-y-2 max-h-60 sm:max-h-72 md:max-h-80 overflow-y-auto pr-1">
                 {notifications.map(notif => (
                   <div
                     key={notif.taskId}
                     className={cn(
-                      'flex items-start gap-3 p-3 rounded-lg border',
+                      'flex items-start gap-2.5 sm:gap-3 p-3 rounded-lg border transition-colors',
                       getUrgencyColor(notif.urgency)
                     )}
                   >
@@ -162,13 +162,13 @@ export function NotificationPanel() {
                       <p className="font-body text-sm font-medium truncate">
                         {notif.title}
                       </p>
-                      <p className="font-body text-xs mt-0.5 opacity-75">
+                      <p className="font-body text-xs mt-0.5 opacity-80 break-words line-clamp-2">
                         {notif.message}
                       </p>
                     </div>
                     <span className={cn(
-                      'shrink-0 font-accent text-xs px-2 py-1 rounded-full',
-                      'bg-white/50'
+                      'shrink-0 font-accent text-[11px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full border',
+                      'bg-background/80 dark:bg-background/50 border-border/50 backdrop-blur-xs'
                     )}>
                       {getUrgencyLabel(notif.urgency)}
                     </span>

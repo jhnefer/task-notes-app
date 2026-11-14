@@ -46,7 +46,12 @@ const queryClient = new QueryClient({
   }),
   mutationCache: new MutationCache({
     onError: (error: any) => {
-      toast.error(`Erro na operação: ${error.message || "Falha ao salvar dados"}`);
+      if (error?.response?.status === 401) {
+        queryClient.setQueryData(["user"], null);
+        toast.error("Sua sessão expirou. Por favor, faça login novamente.");
+      } else {
+        toast.error(`Erro na operação: ${error.message || "Falha ao salvar dados"}`);
+      }
     },
   }),
 });

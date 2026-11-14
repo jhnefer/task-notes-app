@@ -15,6 +15,7 @@ import {
   X,
   FileText,
   Save,
+  Sparkles,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Note } from '@/hooks/useStore';
@@ -41,6 +42,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ExportMenu } from '@/components/ExportMenu';
+import { AiExtractTaskModal } from '@/components/AiExtractTaskModal';
 
 interface NoteFormData {
   title: string;
@@ -62,10 +64,12 @@ function NoteDialog({
   open,
   onClose,
   note,
+  onExtractTask,
 }: {
   open: boolean;
   onClose: () => void;
   note?: Note;
+  onExtractTask?: (note: Note) => void;
 }) {
   const { addNote, updateNote, categories } = useApp();
   const [form, setForm] = useState<NoteFormData>(
@@ -178,21 +182,48 @@ function NoteDialog({
             </button>
           </div>
         </div>
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose} className="font-body">
-            Cancelar
-          </Button>
-          <Button onClick={handleSave} className="font-body bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
-            <Save size={14} />
-            {note ? 'Salvar' : 'Criar Anotação'}
-          </Button>
+        <DialogFooter className="gap-2 sm:justify-between">
+          <div>
+            {note && onExtractTask && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  onClose();
+                  onExtractTask(note);
+                }}
+                className="font-body gap-1.5 text-xs border-indigo-200 text-indigo-700 dark:border-indigo-800 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50"
+              >
+                <Sparkles size={13} className="text-indigo-500" />
+                Extrair Tarefa com IA
+              </Button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={onClose} className="font-body">
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} className="font-body bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
+              <Save size={14} />
+              {note ? 'Salvar' : 'Criar Anotação'}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-function NoteCard({ note, onEdit }: { note: Note; onEdit: (n: Note) => void }) {
+function NoteCard({
+  note,
+  onEdit,
+  onExtractTask,
+}: {
+  note: Note;
+  onEdit: (n: Note) => void;
+  onExtractTask?: (n: Note) => void;
+}) {
   const { deleteNote, toggleNotePin, categories } = useApp();
   const catName = categories.find(c => c.id === note.categoryId)?.name;
 
@@ -237,6 +268,15 @@ function NoteCard({ note, onEdit }: { note: Note; onEdit: (n: Note) => void }) {
           {format(new Date(note.updatedAt), "d MMM yyyy", { locale: ptBR })}
         </span>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {onExtractTask && (
+            <button
+              onClick={() => onExtractTask(note)}
+              className="p-1 rounded hover:bg-indigo-50 dark:hover:bg-indigo-950/60 text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              title="Transformar em Tarefa com IA"
+            >
+              <Sparkles size={14} />
+            </button>
+          )}
           <button
             onClick={() => toggleNotePin(note.id)}
             className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
@@ -268,6 +308,7 @@ export default function Notes() {
   const [filterCategory, setFilterCategory] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | undefined>();
+  const [extractingNote, setExtractingNote] = useState<Note | null>(null);
 
   const filtered = useMemo(() => {
     return notes.filter(n => {
@@ -368,7 +409,7 @@ export default function Notes() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {pinned.map(note => (
-                <NoteCard key={note.id} note={note} onEdit={handleEdit} />
+                <NoteCard key={note.id} note={note} onEdit={handleEdit} onExtractTask={setExtractingNote} />
               ))}
             </div>
           </div>
@@ -386,7 +427,7 @@ export default function Notes() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {unpinned.map(note => (
-                <NoteCard key={note.id} note={note} onEdit={handleEdit} />
+                <NoteCard key={note.id} note={note} onEdit={handleEdit} onExtractTask={setExtractingNote} />
               ))}
             </div>
           </div>
@@ -404,7 +445,13 @@ export default function Notes() {
         )}
       </div>
 
-      <NoteDialog open={dialogOpen} onClose={handleClose} note={editingNote} />
+      <NoteDialog open={dialogOpen} onClose={handleClose} note={editingNote} onExtractTask={setExtractingNote} />
+
+      <AiExtractTaskModal
+        open={!!extractingNote}
+        onClose={() => setExtractingNote(null)}
+        note={extractingNote}
+      />
     </div>
   );
 }
