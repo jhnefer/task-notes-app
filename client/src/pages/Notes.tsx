@@ -228,14 +228,18 @@ function NoteCard({
 
   return (
     <div className={cn(
-      'bg-card border border-border rounded-lg p-4 group',
-      'hover:shadow-md transition-all duration-200 relative',
-      note.pinned && 'border-primary/30 bg-primary/5'
+      'journal-card p-4 group relative',
+      note.pinned ? 'bg-[#FFFDF3] border-[#DECEB4]' : 'bg-[#FFFDF9]'
     )}>
+      {/* Washi tape decorativa no topo das notas fixadas */}
+      {note.pinned && (
+        <div className="washi-tape washi-tape-sage" />
+      )}
+
       {/* Pin indicator */}
       {note.pinned && (
         <div className="absolute top-3 right-3">
-          <Pin size={12} className="text-primary" />
+          <Pin size={13} className="text-primary fill-primary/20" />
         </div>
       )}
 
@@ -251,12 +255,12 @@ function NoteCard({
 
       <div className="flex items-center flex-wrap gap-1.5 mb-3">
         {catName && (
-          <span className="font-body text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+          <span className="font-body text-xs text-[#736353] bg-[#F6F1E8] px-2 py-0.5 rounded-[3px] border border-[#E8DEC8]">
             {catName}
           </span>
         )}
         {note.tags.slice(0, 3).map(tag => (
-          <span key={tag} className="font-body text-xs text-muted-foreground">
+          <span key={tag} className="font-accent text-sm text-[#736353] bg-[#F6F1E8] px-2 py-0.5 rounded-[3px] border border-[#E8DEC8]">
             #{tag}
           </span>
         ))}

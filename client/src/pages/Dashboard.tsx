@@ -49,7 +49,7 @@ function StatCard({
 }) {
   return (
     <div
-      className="bg-card border border-border rounded-xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
+      className="journal-card p-5 relative overflow-hidden transition-all duration-200"
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-start justify-between">
@@ -113,9 +113,9 @@ export default function Dashboard() {
   };
 
   const priorityClass: Record<string, string> = {
-    high: 'text-[#C0533A] bg-[#C0533A]/10',
-    medium: 'text-[#B45309] bg-[#B45309]/10',
-    low: 'text-[#4A7C59] bg-[#4A7C59]/10',
+    high: 'highlighter-high',
+    medium: 'highlighter-medium',
+    low: 'highlighter-low',
   };
 
   const greeting = () => {

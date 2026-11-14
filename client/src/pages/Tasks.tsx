@@ -61,9 +61,9 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
 };
 
 const PRIORITY_COLORS: Record<Priority, string> = {
-  high: 'text-[#C0533A] bg-[#C0533A]/10 border-[#C0533A]/30',
-  medium: 'text-[#B45309] bg-[#B45309]/10 border-[#B45309]/30',
-  low: 'text-[#4A7C59] bg-[#4A7C59]/10 border-[#4A7C59]/30',
+  high: 'highlighter-high',
+  medium: 'highlighter-medium',
+  low: 'highlighter-low',
 };
 
 const STATUS_COLORS: Record<TaskStatus, string> = {
@@ -662,31 +662,39 @@ export default function Tasks() {
                     <div
                       key={task.id}
                       className={cn(
-                        'bg-card border border-border rounded-lg px-4 py-3.5',
-                        'flex items-start gap-4 group hover:shadow-sm transition-shadow',
-                        `priority-${task.priority}`,
-                        task.status === 'done' && 'opacity-70'
+                        'journal-card px-4 py-3.5',
+                        'flex items-start gap-3.5 group relative',
+                        task.status === 'done' && 'opacity-65 bg-[#FAF6EE]/80'
                       )}
                     >
-                      {/* Checkbox */}
+                      {/* Washi tape decorativa no topo para itens destacados */}
+                      {task.priority === 'high' && task.status !== 'done' && (
+                        <div className="washi-tape washi-tape-peach" />
+                      )}
+                      {task.priority === 'medium' && task.dueDate && task.status !== 'done' && (
+                        <div className="washi-tape washi-tape-amber" />
+                      )}
+
+                      {/* Checkbox estilo Bullet Journal */}
                       <button
                         onClick={() => handleToggleTask(task)}
                         className={cn(
-                          'mt-0.5 shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all',
+                          'mt-0.5 shrink-0 w-5 h-5 rounded-[4px] border-[1.5px] transition-all flex items-center justify-center',
                           task.status === 'done'
-                            ? 'bg-[#4A7C59] border-[#4A7C59]'
-                            : 'border-border hover:border-primary'
+                            ? 'bg-[#2D4A3E] border-[#2D4A3E] text-white shadow-2xs'
+                            : 'border-[#7C6A59]/60 bg-[#FFFDF9] hover:border-[#9C3826] hover:bg-[#FFF9F3]'
                         )}
+                        title={task.status === 'done' ? 'Reabrir tarefa' : 'Concluir tarefa'}
                       >
-                        {task.status === 'done' && <Check size={12} className="text-white" />}
+                        {task.status === 'done' && <Check size={12} strokeWidth={2.8} />}
                       </button>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <p className={cn(
-                            'font-body text-sm font-medium text-foreground',
-                            task.status === 'done' && 'line-through text-muted-foreground'
+                            'font-body text-sm font-medium text-foreground transition-colors',
+                            task.status === 'done' && 'line-through text-[#8C8276] decoration-[#9C3826]/70 decoration-[1.5px]'
                           )}>
                             {task.title}
                           </p>
@@ -750,7 +758,7 @@ export default function Tasks() {
 
                               {/* Lista interativa de submetas */}
                               {isExpanded && (
-                                <div className="mt-2.5 space-y-1.5 pl-1">
+                                <div className="mt-2.5 space-y-1.5 p-2 bg-[#FAF6EE]/80 rounded border border-[#EDE4D5]">
                                   {task.subtasks.map(st => (
                                     <div 
                                       key={st.id}
@@ -758,28 +766,28 @@ export default function Tasks() {
                                         e.stopPropagation();
                                         toggleSubtask(task.id, st.id);
                                       }}
-                                      className="flex items-center justify-between p-1.5 rounded hover:bg-muted/60 cursor-pointer text-xs transition-colors"
+                                      className="flex items-center justify-between p-1 rounded hover:bg-[#F2ECE1] cursor-pointer text-xs transition-colors"
                                     >
                                       <div className="flex items-center gap-2 flex-1 min-w-0">
                                         <div className={cn(
-                                          'w-4 h-4 rounded border flex items-center justify-center transition-all shrink-0',
+                                          'w-3.5 h-3.5 rounded-[2px] border-[1.2px] flex items-center justify-center transition-all shrink-0',
                                           st.completed 
-                                            ? 'bg-emerald-500 border-emerald-500 text-white' 
-                                            : 'border-border hover:border-primary'
+                                            ? 'bg-[#2D4A3E] border-[#2D4A3E] text-white' 
+                                            : 'border-[#7C6A59]/60 bg-[#FFFDF9] hover:border-[#9C3826]'
                                         )}>
-                                          {st.completed && <Check size={10} />}
+                                          {st.completed && <Check size={9} strokeWidth={3} />}
                                         </div>
-                                        <span className={cn('truncate', st.completed && 'line-through text-muted-foreground')}>
+                                        <span className={cn('truncate', st.completed && 'line-through text-[#8C8276] decoration-[#9C3826]/70')}>
                                           {st.title}
                                         </span>
                                       </div>
                                       <span className={cn(
-                                        'text-[9px] uppercase px-1 rounded font-medium shrink-0 ml-2',
-                                        st.priority === 'high' ? 'text-red-600 bg-red-50 dark:bg-red-950/50' :
-                                        st.priority === 'medium' ? 'text-amber-600 bg-amber-50 dark:bg-amber-950/50' :
-                                        'text-blue-600 bg-blue-50 dark:bg-blue-950/50'
+                                        'font-accent text-xs px-1.5 py-0.2 rounded shrink-0 ml-2',
+                                        st.priority === 'high' ? 'bg-[#FCE7DF] text-[#9C3826]' :
+                                        st.priority === 'medium' ? 'bg-[#FEF3C7] text-[#854D0E]' :
+                                        'bg-[#DCFCE7] text-[#166534]'
                                       )}>
-                                        {st.priority}
+                                        {st.priority === 'high' ? 'alta' : st.priority === 'medium' ? 'média' : 'baixa'}
                                       </span>
                                     </div>
                                   ))}
@@ -789,25 +797,25 @@ export default function Tasks() {
                           );
                         })()}
 
-                        <div className="flex items-center flex-wrap gap-2 mt-2">
+                        <div className="flex items-center flex-wrap gap-2 mt-2.5">
                           <span className={cn(
-                            'font-accent text-xs px-2 py-0.5 rounded-full border',
+                            'font-accent text-sm px-2.5 py-0.5 tracking-wide shadow-2xs',
                             PRIORITY_COLORS[task.priority]
                           )}>
                             {PRIORITY_LABELS[task.priority]}
                           </span>
 
                           {getCategoryName(task.categoryId) && (
-                            <span className="font-body text-xs text-muted-foreground flex items-center gap-1">
-                              <Tag size={10} />
+                            <span className="font-body text-xs text-[#736353] bg-[#F6F1E8] px-2 py-0.5 rounded-[3px] border border-[#E8DEC8] flex items-center gap-1">
+                              <Tag size={10} className="text-[#8C7A6B]" />
                               {getCategoryName(task.categoryId)}
                             </span>
                           )}
 
                           {due && (
                             <span className={cn(
-                              'font-body text-xs flex items-center gap-1',
-                              isLate ? 'text-destructive' : 'text-muted-foreground'
+                              'font-body text-xs flex items-center gap-1 px-2 py-0.5 rounded-[3px]',
+                              isLate ? 'text-destructive bg-destructive/10' : 'text-[#736353] bg-[#F6F1E8]'
                             )}>
                               {isLate ? <AlertCircle size={10} /> : <Clock size={10} />}
                               {due}
@@ -815,7 +823,7 @@ export default function Tasks() {
                           )}
 
                           {task.tags.map(tag => (
-                            <span key={tag} className="font-body text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                            <span key={tag} className="font-accent text-sm text-[#736353] bg-[#F6F1E8] px-2 py-0.5 rounded-[3px] border border-[#E8DEC8]">
                               #{tag}
                             </span>
                           ))}
