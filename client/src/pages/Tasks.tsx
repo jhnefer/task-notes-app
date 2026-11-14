@@ -17,8 +17,6 @@ import {
   X,
   Clock,
   AlertCircle,
-  LayoutList,
-  Columns3,
   Repeat2,
   Target,
 } from 'lucide-react';
@@ -47,8 +45,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { KanbanBoard } from '@/components/KanbanBoard';
-import { ExportMenu } from '@/components/ExportMenu';
 import { RecurringTaskDialog } from '@/components/RecurringTaskDialog';
 import { AiBreakdownModal } from '@/components/AiBreakdownModal';
 
@@ -435,7 +431,6 @@ export default function Tasks() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [recurringDialogOpen, setRecurringDialogOpen] = useState(false);
   const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
 
@@ -528,78 +523,53 @@ export default function Tasks() {
   return (
     <div className="min-h-full">
       {/* Header */}
-      <div className="px-8 py-6 border-b border-border bg-card/50">
-        <div className="flex items-center justify-between mb-4">
+      <div className="px-4 sm:px-6 md:px-8 py-5 border-b border-border bg-card/50">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
-            <h1 className="font-display text-3xl font-bold text-foreground">Tarefas</h1>
-            <p className="font-body text-sm text-muted-foreground mt-0.5">
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">Tarefas</h1>
+            <p className="font-body text-xs sm:text-sm text-muted-foreground mt-0.5">
               {filtered.length} de {tasks.length} tarefas
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <ExportMenu tasks={filtered} categories={categories} />
             <Button
               onClick={() => setRecurringDialogOpen(true)}
               variant="outline"
-              className="font-body gap-2 border-border"
+              size="sm"
+              className="font-body gap-1.5 border-border text-xs sm:text-sm"
               title="Criar tarefa recorrente"
             >
-              <Repeat2 size={16} />
+              <Repeat2 size={15} />
               Recorrente
             </Button>
             <Button
               onClick={() => { setEditingTask(undefined); setDialogOpen(true); }}
-              className="font-body bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
+              size="sm"
+              className="font-body bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5 text-xs sm:text-sm"
             >
-              <Plus size={16} />
+              <Plus size={15} />
               Nova Tarefa
             </Button>
           </div>
         </div>
 
-        {/* View toggle + Search + Filter */}
-        <div className="flex gap-3 items-center">
-          <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
-            <button
-              onClick={() => setViewMode('list')}
-              className={cn(
-                'p-2 rounded transition-colors',
-                viewMode === 'list'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-              title="Visualização em lista"
-            >
-              <LayoutList size={16} />
-            </button>
-            <button
-              onClick={() => setViewMode('kanban')}
-              className={cn(
-                'p-2 rounded transition-colors',
-                viewMode === 'kanban'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-              title="Visualização Kanban"
-            >
-              <Columns3 size={16} />
-            </button>
-          </div>
+        {/* Search + Filter */}
+        <div className="flex gap-2 sm:gap-3 items-center">
           <div className="relative flex-1">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Buscar tarefas..."
-              className="pl-9 font-body bg-background border-border"
+              className="pl-9 font-body bg-background border-border text-sm"
             />
           </div>
           <Button
             variant="outline"
             onClick={() => setShowFilters(f => !f)}
-            className={cn('font-body gap-2 border-border', showFilters && 'bg-muted')}
+            className={cn('font-body gap-1.5 border-border text-xs sm:text-sm shrink-0', showFilters && 'bg-muted')}
           >
-            <Filter size={15} />
+            <Filter size={14} />
             Filtros
             {activeFilters > 0 && (
               <span className="bg-primary text-primary-foreground text-xs rounded-full w-4 h-4 flex items-center justify-center">
@@ -669,19 +639,8 @@ export default function Tasks() {
       </div>
 
       {/* Content */}
-      <div className="px-8 py-6">
-        {viewMode === 'kanban' ? (
-          /* Kanban view */
-          <KanbanBoard
-            tasks={filtered}
-            onStatusChange={handleStatusChange}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            getCategoryName={getCategoryName}
-          />
-        ) : (
-          /* List view */
-          <div className="space-y-8">
+      <div className="px-4 sm:px-6 md:px-8 py-5">
+        <div className="space-y-8">
         {(['in_progress', 'pending', 'done'] as TaskStatus[]).map(status => {
           const group = grouped[status];
           if (group.length === 0) return null;
@@ -732,7 +691,7 @@ export default function Tasks() {
                             {task.title}
                           </p>
                           {/* Actions */}
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                          <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0">
                             <button
                               onClick={() => handleEdit(task)}
                               className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
@@ -881,7 +840,6 @@ export default function Tasks() {
               </div>
             )}
           </div>
-        )}
       </div>
 
       <TaskDialog open={dialogOpen} onClose={handleDialogClose} task={editingTask} />

@@ -41,7 +41,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ExportMenu } from '@/components/ExportMenu';
 import { AiExtractTaskModal } from '@/components/AiExtractTaskModal';
 
 interface NoteFormData {
@@ -267,7 +266,7 @@ function NoteCard({
         <span className="font-accent text-xs text-muted-foreground">
           {format(new Date(note.updatedAt), "d MMM yyyy", { locale: ptBR })}
         </span>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           {onExtractTask && (
             <button
               onClick={() => onExtractTask(note)}
@@ -340,43 +339,41 @@ export default function Notes() {
   return (
     <div className="min-h-full">
       {/* Header */}
-      <div className="px-8 py-6 border-b border-border bg-card/50">
-        <div className="flex items-center justify-between mb-4">
+      <div className="px-4 sm:px-6 md:px-8 py-5 border-b border-border bg-card/50">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
-            <h1 className="font-display text-3xl font-bold text-foreground">Anotações</h1>
-            <p className="font-body text-sm text-muted-foreground mt-0.5">
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">Anotações</h1>
+            <p className="font-body text-xs sm:text-sm text-muted-foreground mt-0.5">
               {filtered.length} de {notes.length} anotações
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <ExportMenu notes={filtered} categories={categories} />
-            <Button
-              onClick={() => { setEditingNote(undefined); setDialogOpen(true); }}
-              className="font-body bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
-            >
-              <Plus size={16} />
-              Nova Anotação
-            </Button>
-          </div>
+          <Button
+            onClick={() => { setEditingNote(undefined); setDialogOpen(true); }}
+            size="sm"
+            className="font-body bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5 text-xs sm:text-sm self-start sm:self-auto"
+          >
+            <Plus size={15} />
+            Nova Anotação
+          </Button>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3">
           <div className="relative flex-1">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Buscar anotações..."
-              className="pl-9 font-body bg-background border-border"
+              className="pl-9 font-body bg-background border-border text-sm"
             />
           </div>
           <Select value={filterCategory} onValueChange={setFilterCategory}>
-            <SelectTrigger className="w-44 font-body bg-background border-border">
+            <SelectTrigger className="w-36 sm:w-44 font-body bg-background border-border text-xs sm:text-sm">
               <Tag size={14} className="mr-1 text-muted-foreground" />
               <SelectValue placeholder="Categoria" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todas as categorias</SelectItem>
+              <SelectItem value="all">Todas</SelectItem>
               <SelectItem value="none">Sem categoria</SelectItem>
               {categories.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -388,7 +385,7 @@ export default function Notes() {
               variant="ghost"
               size="icon"
               onClick={() => { setSearch(''); setFilterCategory('all'); }}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground shrink-0"
             >
               <X size={16} />
             </Button>
@@ -396,7 +393,7 @@ export default function Notes() {
         </div>
       </div>
 
-      <div className="px-8 py-6 space-y-8">
+      <div className="px-4 sm:px-6 md:px-8 py-5 space-y-8">
         {/* Pinned notes */}
         {pinned.length > 0 && (
           <div>

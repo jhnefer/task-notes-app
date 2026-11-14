@@ -20,7 +20,6 @@ import { useApp } from '@/contexts/AppContext';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { NotificationAlert } from '@/components/NotificationBadge';
 import { NotificationPanel } from '@/components/NotificationPanel';
-import { ResetDataButton } from '@/components/ResetDataButton';
 import { cn } from '@/lib/utils';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -129,8 +128,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-full">
       {/* Top bar with notification panel */}
-      <div className="flex items-center justify-between px-6 md:px-8 py-3 border-b border-border bg-card/30 backdrop-blur-sm">
-        <ResetDataButton />
+      <div className="flex items-center justify-end px-6 md:px-8 py-3 border-b border-border bg-card/30 backdrop-blur-sm">
         <NotificationPanel />
       </div>
 

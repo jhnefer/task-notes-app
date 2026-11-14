@@ -14,11 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   BookOpen,
-  Tag,
   Menu,
   X,
-  BarChart3,
-  Trophy,
   LogOut,
   User,
 } from 'lucide-react';
@@ -92,9 +89,6 @@ function SidebarContent({
     { icon: <LayoutDashboard size={18} />, label: 'Visão Geral', href: '/', showBadge: true },
     { icon: <CheckSquare size={18} />, label: 'Tarefas', href: '/tasks', showBadge: true },
     { icon: <FileText size={18} />, label: 'Anotações', href: '/notes' },
-    { icon: <Tag size={18} />, label: 'Categorias', href: '/categories' },
-    { icon: <BarChart3 size={18} />, label: 'Relatórios', href: '/reports' },
-    { icon: <Trophy size={18} />, label: 'Conquistas', href: '/achievements' },
   ];
 
   return (

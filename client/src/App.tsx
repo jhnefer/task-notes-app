@@ -12,14 +12,10 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AppProvider, useApp } from "./contexts/AppContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
-import { GamificationProvider } from "./contexts/GamificationContext";
 import AppLayout from "./components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Tasks from "./pages/Tasks";
 import Notes from "./pages/Notes";
-import Categories from "./pages/Categories";
-import Reports from "./pages/Reports";
-import Achievements from "./pages/Achievements";
 import AuthPage from "./pages/Auth";
 import { useAuth } from "./hooks/useAuth";
 import { QueryClientProvider, QueryClient, QueryCache, MutationCache } from "@tanstack/react-query";
@@ -74,9 +70,6 @@ function Router() {
         <Route path="/" component={Dashboard} />
         <Route path="/tasks" component={Tasks} />
         <Route path="/notes" component={Notes} />
-        <Route path="/categories" component={Categories} />
-        <Route path="/reports" component={Reports} />
-        <Route path="/achievements" component={Achievements} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
@@ -110,9 +103,7 @@ function AuthGuard() {
 
   return (
     <AppProvider>
-      <GamificationProvider>
-        <AppWithNotifications />
-      </GamificationProvider>
+      <AppWithNotifications />
     </AppProvider>
   );
 }
