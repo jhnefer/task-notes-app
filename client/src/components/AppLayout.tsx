@@ -308,7 +308,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
           )}
         </div>
 
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto dot-grid">
           {children}
         </main>
       </div>

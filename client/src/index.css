@@ -168,6 +168,14 @@
     }
   }
   
+  /* Bullet Journal Dot Grid pattern */
+  .dot-grid {
+    background-color: var(--background);
+    background-image: radial-gradient(oklch(0.55 0.035 60 / 0.28) 1.25px, transparent 1.25px);
+    background-size: 22px 22px;
+    background-position: 0 0;
+  }
+
   /* Paper texture overlay */
   .paper-texture {
     position: relative;
