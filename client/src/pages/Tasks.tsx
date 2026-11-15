@@ -527,8 +527,8 @@ export default function Tasks() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
             <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">Tarefas</h1>
-            <p className="font-body text-xs sm:text-sm text-muted-foreground mt-0.5">
-              {filtered.length} de {tasks.length} tarefas
+            <p className="font-accent text-sm sm:text-[0.95rem] text-muted-foreground mt-0.5">
+              — {filtered.length} de {tasks.length} tarefas —
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -664,8 +664,9 @@ export default function Tasks() {
                       className={cn(
                         'journal-card px-4 py-3.5',
                         'flex items-start gap-3.5 group relative',
-                        task.status === 'done' && 'opacity-65 bg-[#FAF6EE]/80'
+                        task.status === 'done' && 'opacity-60'
                       )}
+                      style={task.status === 'done' ? { backgroundColor: '#F8F4EC' } : undefined}
                     >
                       {/* Washi tape decorativa no topo para itens destacados */}
                       {task.priority === 'high' && task.status !== 'done' && (
@@ -679,15 +680,11 @@ export default function Tasks() {
                       <button
                         onClick={() => handleToggleTask(task)}
                         className={cn(
-                          'mt-0.5 shrink-0 w-5 h-5 rounded-[4px] border-[1.5px] transition-all flex items-center justify-center',
-                          task.status === 'done'
-                            ? 'bg-[#2D4A3E] border-[#2D4A3E] text-white shadow-2xs'
-                            : 'border-[#7C6A59]/60 bg-[#FFFDF9] hover:border-[#9C3826] hover:bg-[#FFF9F3]'
+                          'mt-0.5 shrink-0 bujo-checkbox',
+                          task.status === 'done' && 'bujo-checkbox--checked'
                         )}
                         title={task.status === 'done' ? 'Reabrir tarefa' : 'Concluir tarefa'}
-                      >
-                        {task.status === 'done' && <Check size={12} strokeWidth={2.8} />}
-                      </button>
+                      ></button>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
@@ -823,7 +820,7 @@ export default function Tasks() {
                           )}
 
                           {task.tags.map(tag => (
-                            <span key={tag} className="font-accent text-sm text-[#736353] bg-[#F6F1E8] px-2 py-0.5 rounded-[3px] border border-[#E8DEC8]">
+                            <span key={tag} className="journal-tag">
                               #{tag}
                             </span>
                           ))}

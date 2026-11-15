@@ -151,15 +151,15 @@ export default function Dashboard() {
               <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-3">
                 Visão Geral
               </h1>
-              <p className="font-body text-muted-foreground text-sm">
+              <p className="handwritten-date text-lg" style={{ color: 'var(--ink-graphite)' }}>
                 {format(new Date(), "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })}
               </p>
             </div>
             <div className="hidden md:block text-right">
-              <p className="font-accent text-muted-foreground text-sm">
+              <p className="font-accent text-sm" style={{ color: 'var(--ink-graphite)' }}>
                 {stats.pending + stats.inProgress > 0
-                  ? `${stats.pending + stats.inProgress} tarefas aguardando`
-                  : 'Tudo em dia!'}
+                  ? `— ${stats.pending + stats.inProgress} tarefas aguardando —`
+                  : '— Tudo em dia! —'}
               </p>
               {stats.overdue > 0 && (
                 <p className="font-body text-destructive text-xs mt-1">
@@ -232,8 +232,8 @@ export default function Dashboard() {
             />
           </div>
           <div className="flex items-center justify-between mt-2">
-            <p className="font-body text-xs text-muted-foreground">
-              {stats.done} de {stats.total} tarefas concluídas
+            <p className="font-accent text-xs text-muted-foreground mt-1">
+              — {stats.done} de {stats.total} tarefas concluídas —
             </p>
             {progressPct === 100 && (
               <div className="flex items-center gap-1 text-[#4A7C59]">

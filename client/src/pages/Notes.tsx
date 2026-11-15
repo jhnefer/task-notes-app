@@ -228,8 +228,8 @@ function NoteCard({
 
   return (
     <div className={cn(
-      'journal-card p-4 group relative',
-      note.pinned ? 'bg-[#FFFDF3] border-[#DECEB4]' : 'bg-[#FFFDF9]'
+      'journal-card journal-card-note p-4 group relative',
+      note.pinned ? 'journal-card-pinned' : ''
     )}>
       {/* Washi tape decorativa no topo das notas fixadas */}
       {note.pinned && (
@@ -260,14 +260,14 @@ function NoteCard({
           </span>
         )}
         {note.tags.slice(0, 3).map(tag => (
-          <span key={tag} className="font-accent text-sm text-[#736353] bg-[#F6F1E8] px-2 py-0.5 rounded-[3px] border border-[#E8DEC8]">
+          <span key={tag} className="journal-tag">
             #{tag}
           </span>
         ))}
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="font-accent text-xs text-muted-foreground">
+        <span className="handwritten-date text-sm text-muted-foreground">
           {format(new Date(note.updatedAt), "d MMM yyyy", { locale: ptBR })}
         </span>
         <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
@@ -347,8 +347,8 @@ export default function Notes() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
             <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">Anotações</h1>
-            <p className="font-body text-xs sm:text-sm text-muted-foreground mt-0.5">
-              {filtered.length} de {notes.length} anotações
+            <p className="font-accent text-sm sm:text-[0.95rem] text-muted-foreground mt-0.5">
+              — {filtered.length} de {notes.length} anotações —
             </p>
           </div>
           <Button
