@@ -1,0 +1,10 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Meu Caderno — Gato Marcador (16–24 px cut)</title>
+  <!-- Small-size optical cut: bolder eyes, no tiny nose, crisp silhouette -->
+  <path d="M48 24 L96 64 Q128 56 160 64 L208 24 L208 228 L128 181.81 L48 228 Z" fill="#1B3B36"/>
+  <path d="M48 154 L128 200.19 L208 154 L208 228 L128 181.81 L48 228 Z" fill="#589A67"/>
+  <circle cx="96" cy="116" r="18" fill="#F3EFE6"/>
+  <circle cx="160" cy="116" r="18" fill="#F3EFE6"/>
+  <circle cx="96" cy="116" r="10" fill="#3B4990"/>
+  <circle cx="160" cy="116" r="10" fill="#3B4990"/>
+</svg>

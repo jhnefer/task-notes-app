@@ -1,0 +1,32 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Meu Caderno — Gato Quimono (iOS Opaque)</title>
+  <defs>
+    <clipPath id="eyeLeftIos">
+      <path d="M84 114 Q100 100 116 116 Q113 130 99 130 Q86 128 84 114 Z"/>
+    </clipPath>
+    <clipPath id="eyeRightIos">
+      <path d="M172 114 Q156 100 140 116 Q143 130 157 130 Q170 128 172 114 Z"/>
+    </clipPath>
+  </defs>
+  <!-- Full-bleed opaque warm paper background for iOS AppIcon -->
+  <rect width="256" height="256" fill="#F3EFE6"/>
+  <!-- Sage-green crossed robe shoulders -->
+  <path d="M0 158 L128 231.9 L256 158 L256 256 L0 256 Z" fill="#589A67"/>
+  <!-- Deep forest-teal kimono V-collar trim -->
+  <path d="M72 172 L128 216 L184 172 L166 164 L128 196 L90 164 Z" fill="#1B3B36"/>
+  <!-- Deep forest-teal minimalist cat head -->
+  <path d="M68 112 L68 50 L102 78 Q128 72 154 78 L188 50 L188 112 C188 148 162 172 128 172 C94 172 68 148 68 112 Z" fill="#1B3B36"/>
+  <g clip-path="url(#eyeLeftIos)">
+    <rect x="82" y="98" width="36" height="34" fill="#4E5CC4"/>
+    <ellipse cx="100" cy="131" rx="14" ry="8" fill="#8CC5F8"/>
+    <ellipse cx="101" cy="117" rx="2.6" ry="7.5" fill="#1B3B36"/>
+    <circle cx="107" cy="111" r="3.4" fill="#F3EFE6"/>
+  </g>
+  <g clip-path="url(#eyeRightIos)">
+    <rect x="138" y="98" width="36" height="34" fill="#4E5CC4"/>
+    <ellipse cx="156" cy="131" rx="14" ry="8" fill="#8CC5F8"/>
+    <ellipse cx="155" cy="117" rx="2.6" ry="7.5" fill="#1B3B36"/>
+    <circle cx="161" cy="111" r="3.4" fill="#F3EFE6"/>
+  </g>
+  <path d="M123 136 L133 136 L128 142 Z" fill="#F3EFE6"/>
+</svg>

@@ -1,0 +1,11 @@
+<svg width="360" height="320" viewBox="0 0 360 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Meu Caderno — Gato Sentado (Lockup Vertical)</title>
+  <circle cx="180" cy="124" r="98" fill="#589A67"/>
+  <path d="M142 56 L160 78 Q178 73 194 78 L212 56 L212 100 C216 116 212 132 201 145 C210 156 214 168 212 178 L223 178 C236 178 238 167 232 163 C227 159 229 152 234 150 C243 147 252 154 252 167 C252 183 241 194 223 194 L144 194 C136 194 133 187 135 178 C138 153 148 128 151 111 C142 100 140 86 142 56 Z" fill="#1B3B36"/>
+  <path d="M160 138 L177 160 L194 138 L189 138 L177 152 L165 138 Z" fill="#F3EFE6"/>
+  <ellipse cx="164" cy="105" rx="5.8" ry="7.2" fill="#F3EFE6"/>
+  <ellipse cx="191" cy="105" rx="5.8" ry="7.2" fill="#F3EFE6"/>
+  <circle cx="164" cy="106" r="3.4" fill="#3B4990"/>
+  <circle cx="191" cy="106" r="3.4" fill="#3B4990"/>
+  <text x="180" y="276" text-anchor="middle" fill="#1B3B36" font-family="'DejaVu Serif', Georgia, serif" font-size="42" font-weight="700" letter-spacing="-0.8">Meu Caderno</text>
+</svg>

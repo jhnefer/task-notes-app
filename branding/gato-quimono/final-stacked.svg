@@ -1,0 +1,34 @@
+<svg width="360" height="320" viewBox="0 0 360 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Meu Caderno — Gato Quimono (Lockup Vertical)</title>
+  <defs>
+    <clipPath id="tileClipS">
+      <rect x="82" y="24" width="196" height="196" rx="46"/>
+    </clipPath>
+    <clipPath id="eyeLeftS">
+      <path d="M140 109 Q154 97 168 111 Q165 123 153 123 Q142 121 140 109 Z"/>
+    </clipPath>
+    <clipPath id="eyeRightS">
+      <path d="M220 109 Q206 97 192 111 Q195 123 207 123 Q218 121 220 109 Z"/>
+    </clipPath>
+  </defs>
+  <rect x="82" y="24" width="196" height="196" rx="46" fill="#F3EFE6"/>
+  <g clip-path="url(#tileClipS)">
+    <path d="M82 160 L180 216.58 L278 160 L278 224 L82 224 Z" fill="#589A67"/>
+    <path d="M129 162 L180 202 L231 162 L214 155 L180 184 L146 155 Z" fill="#1B3B36"/>
+    <path d="M125 107 L125 51 L156 76 Q180 71 204 76 L235 51 L235 107 C235 140 211 162 180 162 C149 162 125 140 125 107 Z" fill="#1B3B36"/>
+    <g clip-path="url(#eyeLeftS)">
+      <rect x="138" y="95" width="32" height="30" fill="#4E5CC4"/>
+      <ellipse cx="154" cy="124" rx="12.5" ry="7" fill="#8CC5F8"/>
+      <ellipse cx="155" cy="112" rx="2.3" ry="6.6" fill="#1B3B36"/>
+      <circle cx="160" cy="107" r="3" fill="#F3EFE6"/>
+    </g>
+    <g clip-path="url(#eyeRightS)">
+      <rect x="190" y="95" width="32" height="30" fill="#4E5CC4"/>
+      <ellipse cx="206" cy="124" rx="12.5" ry="7" fill="#8CC5F8"/>
+      <ellipse cx="205" cy="112" rx="2.3" ry="6.6" fill="#1B3B36"/>
+      <circle cx="210" cy="107" r="3" fill="#F3EFE6"/>
+    </g>
+    <path d="M175 129 L185 129 L180 135 Z" fill="#F3EFE6"/>
+  </g>
+  <text x="180" y="276" text-anchor="middle" fill="#1B3B36" font-family="'DejaVu Serif', Georgia, serif" font-size="42" font-weight="700" letter-spacing="-0.8">Meu Caderno</text>
+</svg>

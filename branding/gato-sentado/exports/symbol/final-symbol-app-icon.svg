@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256"><title>Meu Caderno</title><rect width="256" height="256" rx="57.6" fill="#F3EFE6"/><g transform="translate(40.45 40.45) scale(0.684)" fill="none">
+  
+  <circle cx="128" cy="128" r="116" fill="#ffffff"/>
+  <path d="M84 50 L106 76 Q126 70 146 76 L166 50 L166 104 C170 122 166 140 154 154 C164 166 168 180 166 190 L176 190 C192 190 194 176 188 172 C182 168 184 158 190 156 C202 152 212 160 212 176 C212 194 200 208 178 208 L86 208 C78 208 74 200 76 190 C80 162 90 132 94 114 C84 102 82 84 84 50 Z" fill="#ffffff"/>
+  <circle cx="109" cy="108" r="11" fill="#ffffff"/>
+  <circle cx="141" cy="108" r="11" fill="#ffffff"/>
+  <circle cx="109" cy="108" r="6" fill="#ffffff"/>
+  <circle cx="141" cy="108" r="6" fill="#ffffff"/>
+</g></svg>

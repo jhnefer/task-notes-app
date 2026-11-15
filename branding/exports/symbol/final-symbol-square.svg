@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256"><title>Meu Caderno</title><g transform="translate(-16.9 -15.76) scale(1.132)" fill="none">
+  
+  <!-- Main deep forest-teal cat-bookmark silhouette (snapped to exact 30-deg notch) -->
+  <path d="M56 32 L98 66 Q128 58 158 66 L200 32 L200 222 L128 180.43 L56 222 Z" fill="#1B3B36"/>
+  <!-- Sage-green folded ribbon / collar band (exact 30-deg V-cut) -->
+  <path d="M56 156 L128 197.57 L200 156 L200 222 L128 180.43 L56 222 Z" fill="#589A67"/>
+  <!-- Calm almond-shaped cat eyes (warm paper sclera + indigo-blue iris) -->
+  <path d="M82 114 Q100 99 118 114 Q100 129 82 114 Z" fill="#F3EFE6"/>
+  <path d="M138 114 Q156 99 174 114 Q156 129 138 114 Z" fill="#F3EFE6"/>
+  <circle cx="100" cy="114" r="6.5" fill="#3B4990"/>
+  <circle cx="156" cy="114" r="6.5" fill="#3B4990"/>
+  <!-- Minimalist geometric nose triangle -->
+  <path d="M121 134 L135 134 L128 143 Z" fill="#F3EFE6"/>
+</g></svg>

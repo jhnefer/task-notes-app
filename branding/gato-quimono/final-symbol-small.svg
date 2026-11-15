@@ -1,0 +1,17 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Meu Caderno — Gato Quimono (16–24 px cut)</title>
+  <defs>
+    <clipPath id="tileClipSmall">
+      <rect x="12" y="12" width="232" height="232" rx="56"/>
+    </clipPath>
+  </defs>
+  <rect x="12" y="12" width="232" height="232" rx="56" fill="#F3EFE6"/>
+  <g clip-path="url(#tileClipSmall)">
+    <path d="M12 168 L128 234.97 L244 168 L244 248 L12 248 Z" fill="#589A67"/>
+    <path d="M60 112 L60 44 L98 76 Q128 68 158 76 L196 44 L196 112 C196 152 168 178 128 178 C88 178 60 152 60 112 Z" fill="#1B3B36"/>
+    <ellipse cx="98" cy="118" rx="14" ry="15" fill="#4E5CC4"/>
+    <ellipse cx="158" cy="118" rx="14" ry="15" fill="#4E5CC4"/>
+    <ellipse cx="98" cy="118" rx="5.5" ry="9.5" fill="#1B3B36"/>
+    <ellipse cx="158" cy="118" rx="5.5" ry="9.5" fill="#1B3B36"/>
+  </g>
+</svg>

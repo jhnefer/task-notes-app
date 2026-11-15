@@ -63,8 +63,22 @@ export function registerRoutes(app: Express): Server {
     if (!result.success) {
       return res.status(400).json({ errors: result.error.flatten().fieldErrors });
     }
-    const newCategory = { ...result.data, id: nanoid(), userId: user.id };
-    await db.insert(categories).values(newCategory);
+    const newCategory = {
+      ...result.data,
+      id: result.data.id || nanoid(),
+      userId: user.id,
+    };
+    await db
+      .insert(categories)
+      .values(newCategory)
+      .onConflictDoUpdate({
+        target: categories.id,
+        set: {
+          name: newCategory.name,
+          color: newCategory.color,
+          icon: newCategory.icon,
+        },
+      });
     res.status(201).json(newCategory);
   });
 
@@ -99,30 +113,56 @@ export function registerRoutes(app: Express): Server {
     const now = new Date().toISOString();
     const cleanTags = safeParseArray(result.data.tags);
     const cleanSubtasks = safeParseArray(result.data.subtasks);
+    const recurrenceStr = result.data.recurrence
+      ? typeof result.data.recurrence === "string"
+        ? result.data.recurrence
+        : JSON.stringify(result.data.recurrence)
+      : null;
     const newTask = {
       ...result.data,
-      id: nanoid(),
+      id: result.data.id || nanoid(),
       userId: user.id,
-      createdAt: now,
-      updatedAt: now,
+      createdAt: result.data.createdAt || now,
+      updatedAt: result.data.updatedAt || now,
+      recurrence: recurrenceStr,
       tags: JSON.stringify(cleanTags),
       subtasks: JSON.stringify(cleanSubtasks),
     };
-    await db.insert(tasks).values(newTask as any);
+    await db
+      .insert(tasks)
+      .values(newTask as any)
+      .onConflictDoUpdate({
+        target: tasks.id,
+        set: {
+          title: newTask.title,
+          description: newTask.description,
+          priority: newTask.priority,
+          status: newTask.status,
+          categoryId: newTask.categoryId,
+          dueDate: newTask.dueDate,
+          updatedAt: newTask.updatedAt,
+          tags: newTask.tags,
+          recurrence: newTask.recurrence,
+          subtasks: newTask.subtasks,
+        },
+      });
     res.status(201).json({ ...newTask, tags: cleanTags, subtasks: cleanSubtasks });
   });
 
   app.patch("/api/tasks/:id", isAuthenticated, async (req, res) => {
     const user = req.user as any;
     const { id } = req.params;
-    const updates = { ...req.body, updatedAt: new Date().toISOString() };
+    const updates = { ...req.body, updatedAt: req.body.updatedAt || new Date().toISOString() };
     
-    // Normalizar tags e subtasks se fornecidos
+    // Normalizar tags, subtasks e recurrence se fornecidos
     if (updates.tags !== undefined) {
       updates.tags = JSON.stringify(safeParseArray(updates.tags));
     }
     if (updates.subtasks !== undefined) {
       updates.subtasks = JSON.stringify(safeParseArray(updates.subtasks));
+    }
+    if (updates.recurrence !== undefined && updates.recurrence !== null && typeof updates.recurrence !== "string") {
+      updates.recurrence = JSON.stringify(updates.recurrence);
     }
     
     // Regra de integridade: se tentar mudar o status da tarefa principal para "done",
@@ -179,20 +219,33 @@ export function registerRoutes(app: Express): Server {
     const now = new Date().toISOString();
     const newNote = {
       ...result.data,
-      id: nanoid(),
+      id: result.data.id || nanoid(),
       userId: user.id,
-      createdAt: now,
-      updatedAt: now,
+      createdAt: result.data.createdAt || now,
+      updatedAt: result.data.updatedAt || now,
       tags: JSON.stringify(result.data.tags || []),
     };
-    await db.insert(notes).values(newNote as any);
+    await db
+      .insert(notes)
+      .values(newNote as any)
+      .onConflictDoUpdate({
+        target: notes.id,
+        set: {
+          title: newNote.title,
+          content: newNote.content,
+          categoryId: newNote.categoryId,
+          updatedAt: newNote.updatedAt,
+          tags: newNote.tags,
+          pinned: newNote.pinned,
+        },
+      });
     res.status(201).json({ ...newNote, tags: result.data.tags || [] });
   });
 
   app.patch("/api/notes/:id", isAuthenticated, async (req, res) => {
     const user = req.user as any;
     const { id } = req.params;
-    const updates = { ...req.body, updatedAt: new Date().toISOString() };
+    const updates = { ...req.body, updatedAt: req.body.updatedAt || new Date().toISOString() };
     if (updates.tags) updates.tags = JSON.stringify(updates.tags);
     
     await db.update(notes)

@@ -1,0 +1,42 @@
+{
+  "brand": "Meu Caderno",
+  "tagline": "Tarefas, submetas e anotações com calma",
+  "brief": "Aplicativo de gestão de tarefas e notas com estética acolhedora de caderno de papel (Warm Paper Notebook). A marca une um gatinho minimalista a um marcador de página, com paleta inspirada na personagem de referência.",
+  "adjectives": [
+    "minimalista",
+    "sereno",
+    "organizado",
+    "acolhedor"
+  ],
+  "criteria": "Legível em 16 px (favicon/app icon), funciona em uma cor, distinto em produtividade.",
+  "industry": "consumer-app",
+  "nav": [
+    "Tarefas",
+    "Anotações",
+    "Kanban"
+  ],
+  "brand_color": "#1B3B36",
+  "greyscale": false,
+  "designer": "Logo Design Skill",
+  "round": 2,
+  "concepts": [
+    {
+      "name": "Gato Marcador",
+      "symbol": "final-symbol.svg",
+      "lockup": "final-horizontal.svg",
+      "symbol_on_tile": "final-symbol.svg",
+      "tile_color": "#F3EFE6",
+      "idea": "Um marcador de página em forma de gato minimalista com faixa sálvia e olhos índigo.",
+      "rationale": [
+        "Une a metáfora de caderno (marcador) ao gatinho minimalista em uma única silhueta",
+        "Ângulos exatos de 30° e corte óptico dedicado para 16–24 px (final-symbol-small.svg)",
+        "Paleta da personagem: verde-floresta (#1B3B36), sálvia (#589A67), índigo (#3B4990) e papel marfim (#F3EFE6)"
+      ]
+    }
+  ],
+  "recommendation": "Gato Marcador — aprovado para produção com kit completo (variantes monocromáticas, lockups, web-icons e guia rápido).",
+  "next_steps": [
+    "Integrar exports/symbol/ ao PWA/web e app Flutter",
+    "Converter wordmark em curvas caso vá para impressão gráfica"
+  ]
+}

@@ -1,0 +1,13 @@
+<svg width="760" height="256" viewBox="0 0 760 256" fill="none" xmlns="http://www.w3.org/2000/svg"><title>Meu Caderno</title>
+  
+  <!-- Symbol -->
+  <path d="M40 32 L82 66 Q112 58 142 66 L184 32 L184 222 L112 180.43 L40 222 Z" fill="#1b3b36"/>
+  <path d="M40 156 L112 197.57 L184 156 L184 222 L112 180.43 L40 222 Z" fill="#1b3b36"/>
+  <path d="M66 114 Q84 99 102 114 Q84 129 66 114 Z" fill="#1b3b36"/>
+  <path d="M122 114 Q140 99 158 114 Q140 129 122 114 Z" fill="#1b3b36"/>
+  <circle cx="84" cy="114" r="6.5" fill="#1b3b36"/>
+  <circle cx="140" cy="114" r="6.5" fill="#1b3b36"/>
+  <path d="M105 134 L119 134 L112 143 Z" fill="#1b3b36"/>
+  <!-- Wordmark (live text — convert to outlines in vector editor for print) -->
+  <text x="224" y="148" fill="#1b3b36" font-family="'DejaVu Serif', Georgia, serif" font-size="68" font-weight="700" letter-spacing="-1.5">Meu Caderno</text>
+</svg>

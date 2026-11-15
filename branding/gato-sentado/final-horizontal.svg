@@ -1,0 +1,11 @@
+<svg width="760" height="256" viewBox="0 0 760 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Meu Caderno — Gato Sentado (Lockup Horizontal)</title>
+  <circle cx="120" cy="128" r="102" fill="#589A67"/>
+  <path d="M80 58 L99 81 Q118 75 135 81 L154 58 L154 103 C158 120 154 137 142 150 C152 162 156 174 154 184 L165 184 C178 184 180 173 174 169 C169 165 171 158 176 156 C186 152 195 160 195 173 C195 190 184 201 165 201 L82 201 C74 201 71 194 73 184 C76 158 86 132 90 115 C80 103 78 88 80 58 Z" fill="#1B3B36"/>
+  <path d="M99 143 L117 166 L135 143 L129 143 L117 157 L105 143 Z" fill="#F3EFE6"/>
+  <ellipse cx="103" cy="109" rx="6" ry="7.5" fill="#F3EFE6"/>
+  <ellipse cx="131" cy="109" rx="6" ry="7.5" fill="#F3EFE6"/>
+  <circle cx="103" cy="110" r="3.5" fill="#3B4990"/>
+  <circle cx="131" cy="110" r="3.5" fill="#3B4990"/>
+  <text x="248" y="148" fill="#1B3B36" font-family="'DejaVu Serif', Georgia, serif" font-size="66" font-weight="700" letter-spacing="-1.5">Meu Caderno</text>
+</svg>

@@ -77,7 +77,12 @@ export const notes = sqliteTable("notes", {
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 
 export const insertTaskSchema = createInsertSchema(tasks, {
-  dueDate: z.string().datetime().optional(),
+  id: z.string().optional(),
+  dueDate: z.string().optional().nullable(),
+  categoryId: z.string().optional().nullable(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+  recurrence: z.union([z.string(), z.record(z.string(), z.any())]).optional().nullable(),
   tags: z.array(z.string()).optional(),
   subtasks: z.array(z.object({
     id: z.string(),
@@ -86,23 +91,22 @@ export const insertTaskSchema = createInsertSchema(tasks, {
     priority: z.enum(PRIORITY_OPTIONS),
   })).optional(),
 }).omit({
-  id: true,
   userId: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 export const insertNoteSchema = createInsertSchema(notes, {
+  id: z.string().optional(),
+  categoryId: z.string().optional().nullable(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
   tags: z.array(z.string()).optional(),
 }).omit({
-  id: true,
   userId: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
-export const insertCategorySchema = createInsertSchema(categories).omit({
-  id: true,
+export const insertCategorySchema = createInsertSchema(categories, {
+  id: z.string().optional(),
+}).omit({
   userId: true,
 });
 

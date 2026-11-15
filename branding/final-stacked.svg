@@ -1,0 +1,13 @@
+<svg width="360" height="320" viewBox="0 0 360 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Meu Caderno — Lockup Vertical</title>
+  <!-- Symbol centered at x=180 -->
+  <path d="M108 24 L150 58 Q180 50 210 58 L252 24 L252 214 L180 172.43 L108 214 Z" fill="#1B3B36"/>
+  <path d="M108 148 L180 189.57 L252 148 L252 214 L180 172.43 L108 214 Z" fill="#589A67"/>
+  <path d="M134 106 Q152 91 170 106 Q152 121 134 106 Z" fill="#F3EFE6"/>
+  <path d="M190 106 Q208 91 226 106 Q208 121 190 106 Z" fill="#F3EFE6"/>
+  <circle cx="152" cy="106" r="6.5" fill="#3B4990"/>
+  <circle cx="208" cy="106" r="6.5" fill="#3B4990"/>
+  <path d="M173 126 L187 126 L180 135 Z" fill="#F3EFE6"/>
+  <!-- Wordmark -->
+  <text x="180" y="276" text-anchor="middle" fill="#1B3B36" font-family="'DejaVu Serif', Georgia, serif" font-size="42" font-weight="700" letter-spacing="-0.8">Meu Caderno</text>
+</svg>

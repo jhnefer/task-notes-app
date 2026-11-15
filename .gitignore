@@ -42,3 +42,59 @@ dist-ssr/
 *.pem
 sqlite.db*
 drizzle/
+
+
+# flutter 
+# Miscellaneous 
+*.class         
+*.log           
+*.pyc           
+*.swp           
+.DS_Store       
+.atom/          
+.build/         
+.buildlog/      
+.history        
+.svn/           
+.swiftpm/       
+migrate_working_
+                
+# IntelliJ relat
+*.iml           
+*.ipr           
+*.iws           
+.idea/          
+                
+# The .vscode fo
+# VS Code which 
+# is commented o
+#.vscode/       
+                
+# Flutter/Dart/P
+**/doc/api/     
+**/ios/Flutter/.
+.dart_tool/     
+.flutter-plugins
+.pub-cache/     
+.pub/           
+/build/         
+/coverage/      
+                
+# Symbolication 
+app.*.symbols   
+                
+# Obfuscation re
+app.*.map.json  
+                
+# Android Studio
+android/app/pro
+android/app/deb
+android/app/rel
+                
+# Widget Preview
+.widget_preview/
+
+
+workspace
+
+.agents
